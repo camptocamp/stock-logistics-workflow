@@ -118,7 +118,7 @@ class StockPickingPackagePreparation(models.Model):
         relation='stock_quant_pack_prepare_rel',
         column1='stock_picking_package_preparation_id',
         column2='stock_quant_id',
-        name='All Content',
+        string='All Content',
     )
 
     @api.one
@@ -136,6 +136,8 @@ class StockPickingPackagePreparation(models.Model):
                  'package_id.quant_ids')
     def _compute_weight(self):
         package = self.package_id
+        if not package:
+            return
         quant_model = self.env['stock.quant']
         package_model = self.env['stock.quant.package']
         quants = quant_model.browse(package.get_content())
