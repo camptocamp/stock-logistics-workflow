@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2013-2015 Camptocamp SA - Nicolas Bessi
 # Copyright 2013-2015 Camptocamp SA - Guewen Baconnier
 # Copyright 2013-2015 Camptocamp SA - Yannick Vaucher
