@@ -61,7 +61,7 @@ Contributors
 * Guewen Baconnier <guewen.baconnier@camptocamp.com>
 * Yannick Vaucher <yannick.vaucher@camptocamp.com>
 * Vicent Cubells <vicent.cubells@tecnativa.com>
-* Julien Coux <guewen.baconnier@camptocamp.com>
+* Julien Coux <julien.coux@camptocamp.com>
 
 Maintainer
 ----------

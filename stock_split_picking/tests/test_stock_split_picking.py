@@ -48,18 +48,18 @@ class TestStockSplitPicking(SavepointCase):
             self.picking.split_process()
         # We assign quantities in order to split
         self.picking.action_assign()
-        pack_opt = self.env['stock.move.line'].search(
+        move_line = self.env['stock.move.line'].search(
             [('picking_id', '=', self.picking.id)], limit=1)
-        pack_opt.qty_done = 4.0
+        move_line.qty_done = 4.0
         # Split picking: 4 and 6
         # import pdb; pdb.set_trace()
         self.picking.split_process()
 
         # We have a picking with 4 units in state assigned
-        self.assertAlmostEqual(pack_opt.qty_done, 4.0)
-        self.assertAlmostEqual(pack_opt.product_qty, 4.0)
-        self.assertAlmostEqual(pack_opt.product_uom_qty, 4.0)
-        self.assertAlmostEqual(pack_opt.ordered_qty, 10.0)
+        self.assertAlmostEqual(move_line.qty_done, 4.0)
+        self.assertAlmostEqual(move_line.product_qty, 4.0)
+        self.assertAlmostEqual(move_line.product_uom_qty, 4.0)
+        self.assertAlmostEqual(move_line.ordered_qty, 10.0)
 
         self.assertAlmostEqual(self.move.quantity_done, 4.0)
         self.assertAlmostEqual(self.move.product_qty, 4.0)
@@ -70,13 +70,13 @@ class TestStockSplitPicking(SavepointCase):
         # An another one with 6 units in state assigned
         new_picking = self.env['stock.picking'].search(
             [('backorder_id', '=', self.picking.id)], limit=1)
-        pack_opt = self.env['stock.move.line'].search(
+        move_line = self.env['stock.move.line'].search(
             [('picking_id', '=', new_picking.id)], limit=1)
 
-        self.assertAlmostEqual(pack_opt.qty_done, 0.0)
-        self.assertAlmostEqual(pack_opt.product_qty, 6.0)
-        self.assertAlmostEqual(pack_opt.product_uom_qty, 6.0)
-        self.assertAlmostEqual(pack_opt.ordered_qty, 6.0)
+        self.assertAlmostEqual(move_line.qty_done, 0.0)
+        self.assertAlmostEqual(move_line.product_qty, 6.0)
+        self.assertAlmostEqual(move_line.product_uom_qty, 6.0)
+        self.assertAlmostEqual(move_line.ordered_qty, 6.0)
 
         self.assertAlmostEqual(new_picking.move_lines.quantity_done, 0.0)
         self.assertAlmostEqual(new_picking.move_lines.product_qty, 6.0)

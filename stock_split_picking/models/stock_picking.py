@@ -24,48 +24,55 @@ class StockPicking(models.Model):
                     _('You must enter done quantity in order to split your '
                       'picking in several ones.'))
 
-            # Split moves where necessary and move quants
-            moves_to_move = self.env['stock.move']
+            # Split moves considering the qty_done on moves
+            new_moves = self.env['stock.move']
             for move in picking.move_lines:
                 rounding = move.product_uom.rounding
-                if float_compare(move.quantity_done, move.product_uom_qty,
-                                 precision_rounding=rounding) < 0:
-                    # Need to do some kind of conversion here
-                    qty_split = move.product_uom._compute_quantity(
-                        move.product_uom_qty - move.quantity_done,
-                        move.product_id.uom_id, rounding_method='HALF-UP')
-                    new_move_id = move._split(qty_split)
+                qty_done = move.quantity_done
+                qty_initial = move.product_uom_qty
+                qty_diff_compare = float_compare(
+                    qty_done, qty_initial, precision_rounding=rounding
+                )
+                if qty_diff_compare < 0:
+                    qty_split = qty_initial - qty_done
+                    qty_uom_split = move.product_uom._compute_quantity(
+                        qty_split,
+                        move.product_id.uom_id,
+                        rounding_method='HALF-UP'
+                    )
+                    new_move_id = move._split(qty_uom_split)
                     for move_line in move.move_line_ids:
                         if move_line.product_qty and move_line.qty_done:
-                            # FIXME: there will be an issue
-                            # if the move was partially available
-                            # By decreasing `product_qty`,
-                            # we free the reservation.
-                            # FIXME: if qty_done > product_qty,
-                            # this could raise if nothing is in stock
+                            # To avoid an error
+                            # when picking is partially available
                             try:
                                 move_line.write(
                                     {'product_uom_qty': move_line.qty_done})
                             except UserError:
                                 pass
+                    new_moves |= self.env['stock.move'].browse(new_move_id)
 
-                    moves_to_move |= self.env['stock.move'].browse(new_move_id)
-
-            # If we have moves to move, create the backorder picking
-            if moves_to_move:
+            # If we have new moves to move, create the backorder picking
+            if new_moves:
                 backorder_picking = picking.copy({
                     'name': '/',
                     'move_lines': [],
                     'move_line_ids': [],
-                    'backorder_id': picking.id
+                    'backorder_id': picking.id,
                 })
-                picking.message_post(_(
-                    'The backorder <a href=# data-oe-model='
-                    'stock.picking data-oe-id=%d>%s</a> has been created.') % (
-                                     backorder_picking.id,
-                                     backorder_picking.name))
-                moves_to_move.write(
-                    {'picking_id': backorder_picking.id})
-                moves_to_move.mapped('move_line_ids').write(
-                    {'picking_id': backorder_picking.id})
-                moves_to_move._action_assign()
+                picking.message_post(
+                    _(
+                        'The backorder <a href=# data-oe-model='
+                        'stock.picking data-oe-id=%d>%s</a> has been created.'
+                    ) % (
+                        backorder_picking.id,
+                        backorder_picking.name
+                    )
+                )
+                new_moves.write({
+                    'picking_id': backorder_picking.id,
+                })
+                new_moves.mapped('move_line_ids').write({
+                    'picking_id': backorder_picking.id,
+                })
+                new_moves._action_assign()
