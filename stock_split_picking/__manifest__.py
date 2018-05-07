@@ -12,12 +12,11 @@
               "Tecnativa, "
               "Odoo Community Association (OCA)",
     'license': 'AGPL-3',
-    'website': 'http://www.camptocamp.com',
+    'website': 'https://github.com/OCA/stock-logistics-workflow',
     'depends': [
         'stock',
     ],
     'data': [
         'views/stock_partial_picking.xml',
     ],
-    'installable': True,
 }
