@@ -46,7 +46,7 @@ class StockMove(models.Model):
 
     @api.multi
     def _propagate_quantity_to_dest_moves(self):
-        """Propagate the quantity to all dest moves where propagate is True."""
+        """Propagate the quantity if propagate and only one dest move."""
         for move in self:
             if not move.propagate:
                 continue
