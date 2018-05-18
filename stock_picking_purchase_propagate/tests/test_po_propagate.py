@@ -251,18 +251,19 @@ class TestPoPropagate(SavepointCase):
             else:
                 self.assertFalse(move.picking_id.group_id)
 
-        # Ensure PO was generated with the quantity from both OP
+        # Ensure PO was generated with one line for each OP
         po_pianos = self.env['purchase.order'].search(
             [('partner_id', '=', self.piano_store.id)])
-        self.assertEqual(len(po_pianos.order_line), 1)
-        self.assertAlmostEqual(po_pianos.order_line.product_qty, 20.0)
-        po_pianos.order_line.write({
-            'product_qty': 15.0
-        })
+        self.assertEqual(len(po_pianos.order_line), 2)
+        for line in po_pianos.order_line:
+            self.assertAlmostEqual(line.product_qty, 10.0)
+            # Reduce qty on the line without PG.
+            if not line.procurement_group_id:
+                line.write({'product_qty': 6.0})
         po_pianos.button_confirm()
         for move in piano_moves_to_wh:
-            # TODO FIXME :
-            # actually the quantity reduction doesn't work as both
-            # transfers get the new qty (15.0) which is bigger than
-            # what we're supposed to receive
-            self.assertAlmostEqual(move.product_uom_qty, 10.0)
+            if move.group_id == wh_wh2_pg:
+                self.assertAlmostEqual(move.product_uom_qty, 10.0)
+            else:
+                self.assertAlmostEqual(move.product_uom_qty, 6.0)
+                self.assertEqual(move.group_id.name, po_pianos.name)

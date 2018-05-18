@@ -45,23 +45,33 @@ class StockMove(models.Model):
         return res
 
     @api.multi
-    def _propagate_quantity_to_dest_moves(self):
+    def _propagate_quantity_to_dest_moves(self, until_dest_location=None):
         """Propagate the quantity to all dest moves where propagate is True."""
         for move in self:
-            # TODO Check if dest stock of dest move is not in PO's WH
-            # through purchase_order.picking_id.default_location_dest_id
-            # get the WH and WH.lot_stock_id
             if not move.propagate:
                 continue
+            # Check if sum of dest move qty is same as move qty
+            check_move_qty = 0
+            for dest_move in move.move_dest_ids:
+                if move.product_uom != dest_move.product_uom:
+                    check_move_qty += dest_move.product_uom._compute_quantity(
+                        dest_move.product_uom_qty, move.product_uom)
+                else:
+                    check_move_qty += dest_move.product_uom_qty
+            # Stop propagation of qty if sum of dest moves qty is different
+            # than move qty
+            if check_move_qty != move.product_uom_qty:
+                continue
+            # If quantity is the same, there's no risk to propagate
             for dest_move in move.move_dest_ids:
                 # Convert qty in dest move uom if needed
                 if move.product_uom != dest_move.product_uom:
-                    new_qty = move.product_uom._compute_quantity(
+                    dest_qty = move.product_uom._compute_quantity(
                         move.product_uom_qty, dest_move.product_uom)
                 else:
-                    new_qty = move.product_uom_qty
+                    dest_qty = move.product_uom_qty
                 dest_move.write({
-                    'product_uom_qty': new_qty
+                    'product_uom_qty': dest_qty
                 })
                 # Recursive call on destination moves
                 dest_move._propagate_quantity_to_dest_moves()
