@@ -8,8 +8,6 @@ class PurchaseOrderLine(models.Model):
 
     _inherit = 'purchase.order.line'
 
-    orig_procurement_qty = fields.Float()
-
     @api.multi
     def _create_stock_moves(self, picking):
         """ When creating the moves from a PO, propagate the procurement group
