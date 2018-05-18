@@ -233,7 +233,7 @@ class TestPoPropagate(SavepointCase):
         self.piano.write({
             'route_ids': [(4, wh_wh2_route.id)]
         })
-        piano_op_wh2 = self.piano_op.copy({
+        self.piano_op.copy({
             'name': 'OP/%s-2' % self.piano.name,
             'location_id': wh2.lot_stock_id.id
         })

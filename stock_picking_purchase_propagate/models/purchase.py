@@ -20,4 +20,3 @@ class PurchaseOrderLine(models.Model):
             moves.mapped('group_id'))
         moves._propagate_quantity_to_dest_moves()
         return moves
-
