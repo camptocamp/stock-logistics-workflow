@@ -17,14 +17,14 @@ class StockPicking(models.Model):
         wiz = self.env['stock.picking.split'].create({'picking_id': self.id})
         view = self.env.ref('stock_split_picking.stock_picking_split_form')
         return {
-                    'name': _('Split Picking'),
-                    'type': 'ir.actions.act_window',
-                    'view_type': 'form',
-                    'view_mode': 'form',
-                    'res_model': 'stock.picking.split',
-                    'views': [(view.id, 'form')],
-                    'view_id': view.id,
-                    'target': 'new',
-                    'res_id': wiz.id,
-                    'context': self.env.context,
-            }
+            'name': _('Split Picking'),
+            'type': 'ir.actions.act_window',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'stock.picking.split',
+            'views': [(view.id, 'form')],
+            'view_id': view.id,
+            'target': 'new',
+            'res_id': wiz.id,
+            'context': self.env.context,
+        }
