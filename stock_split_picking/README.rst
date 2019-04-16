@@ -38,6 +38,9 @@ To use this module, you need to:
 Known issues / Roadmap
 ======================
 
+* add tests with moves having destination moves + propagate enabled:
+    - splitting the original move should split the destination move too
+    - splitting the destination move is allowed only if all the qty is splitted
 
 Bug Tracker
 ===========

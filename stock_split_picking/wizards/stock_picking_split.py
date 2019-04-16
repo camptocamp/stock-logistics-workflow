@@ -4,7 +4,7 @@
 from odoo import _, api, models, fields
 from odoo.exceptions import ValidationError
 from odoo.addons import decimal_precision as dp
-from odoo.tools import float_compare
+from odoo.tools import float_compare, float_is_zero
 
 
 class StockPickingSplit(models.TransientModel):
@@ -51,13 +51,13 @@ class StockPickingSplit(models.TransientModel):
         # with the same product+UoM.
         product_split = {}
         for line in self.line_ids:
-            key = (line.product_id, line.product_uom_id)
+            key = (line.product_id, line.product_uom_id, line.full_split)
             product_split[key] = line.split_qty
         new_move_ids = []
         for move in picking.move_lines:
             if move.state in ('cancel', 'done'):
                 continue
-            key = (move.product_id, move.product_uom)
+            key = (move.product_id, move.product_uom, bool(move.move_orig_ids))
             to_split = min(product_split[key], move.product_uom_qty)
             # if to_split > 0
             if float_compare(to_split, 0, precision_digits=uom_dp) == 1:
@@ -94,20 +94,26 @@ class StockPickingSplit(models.TransientModel):
                 continue
             reserved_availability = move.product_id.uom_id._compute_quantity(
                 move.reserved_availability, move.product_uom)
-            key = (move.product_id, move.product_uom)
+            # key = (Product, UoM, Full split)
+            key = (move.product_id, move.product_uom, bool(move.move_orig_ids))
             if key not in product_qty:
                 product_qty[key] = move.product_uom_qty
                 product_availability[key] = reserved_availability
             else:
                 product_qty[key] += move.product_uom_qty
                 product_availability[key] += reserved_availability
+            # But if the move has ancestor, its qty to split is all or nothing.
+            # The default value is 0, up to the user to change it
+            if move.move_orig_ids:
+                product_availability[key] = 0
         for key, qty in product_qty.items():
-            product, uom = key
+            product, uom, full_split = key
             vals = {'picking_id': self.picking_id.id,
                     'product_qty': qty,
                     'split_qty': product_availability[key],
                     'product_id': product.id,
                     'product_uom_id': uom.id,
+                    'full_split': full_split,
                     }
             line_ids |= self.env['stock.picking.split.line'].create(vals)
         self.line_ids = line_ids
@@ -134,6 +140,11 @@ class StockPickingSplitLine(models.TransientModel):
         'Split', default=0.0,
         digits=dp.get_precision('Product Unit of Measure'), required=True
     )
+    full_split = fields.Boolean(
+        default=False, readonly=True,
+        help="Used to disallow a partial split of a move if another one is "
+             "depending on it (ancestor).",
+    )
 
     @api.constrains('product_qty', 'split_qty')
     def _check_qty(self):
@@ -145,14 +156,33 @@ class StockPickingSplitLine(models.TransientModel):
                     rec.split_qty, rec.product_qty,
                     precision_digits=uom_dp) == 1:
                 raise ValidationError(
-                    _('Split quantity for product %s '
-                      'must be less than %.3f') %
-                    (rec.product_id.name, rec.product_qty)
+                    _('Split quantity for product %s (%s) '
+                      'must be less than %.3f') % (
+                          rec.product_id.name,
+                          rec.product_uom_id.name,
+                          rec.product_qty,
+                    )
                 )
             # if qty to split is negative
             if float_compare(rec.split_qty, 0, precision_digits=uom_dp) == -1:
                 raise ValidationError(
-                    _('Split quantity for product %s '
+                    _('Split quantity for product %s (%s) '
                       'must be greater than or equal to 0') %
-                    (rec.product_id.name)
+                    (rec.product_id.name, rec.product_uom_id.name)
+                )
+            # if only a full split is allowed
+            partial_split = (
+                rec.full_split
+                and not float_is_zero(rec.split_qty, precision_digits=uom_dp)
+                and float_compare(
+                    rec.split_qty, rec.product_qty,
+                    precision_digits=uom_dp) != 0)
+            if partial_split:
+                raise ValidationError(
+                    _('Split quantity for product %s (%s) '
+                      'should be 0 or %s: full split only') % (
+                          rec.product_id.name,
+                          rec.product_uom_id.name,
+                          rec.product_qty,
+                    )
                 )
