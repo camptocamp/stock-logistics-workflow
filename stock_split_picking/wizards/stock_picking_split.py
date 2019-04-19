@@ -51,13 +51,16 @@ class StockPickingSplit(models.TransientModel):
         # with the same product+UoM.
         product_split = {}
         for line in self.line_ids:
-            key = (line.product_id, line.product_uom_id, line.full_split)
+            key = (line.product_id, line.product_uom_id,
+                   line.restrict_lot_id, line.full_split)
             product_split[key] = line.split_qty
         new_move_ids = []
         for move in picking.move_lines:
             if move.state in ('cancel', 'done'):
                 continue
-            key = (move.product_id, move.product_uom, bool(move.move_orig_ids))
+            # key = (Product, UoM, Lot, Full split)
+            key = (move.product_id, move.product_uom,
+                   move.restrict_lot_id, bool(move.move_orig_ids))
             to_split = min(product_split[key], move.product_uom_qty)
             # if to_split > 0
             if float_compare(to_split, 0, precision_digits=uom_dp) == 1:
@@ -66,7 +69,10 @@ class StockPickingSplit(models.TransientModel):
                 # UoM of the product
                 to_split_converted = move.product_uom._compute_quantity(
                     to_split, move.product_id.uom_id)
-                new_move_ids.append(move.split(to_split_converted))
+                new_move_id = move.split(
+                    to_split_converted,
+                    restrict_lot_id=move.restrict_lot_id.id)
+                new_move_ids.append(new_move_id)
         self.env['stock.move'].browse(new_move_ids).write(
             {'picking_id': split_picking.id}
         )
@@ -94,8 +100,9 @@ class StockPickingSplit(models.TransientModel):
                 continue
             reserved_availability = move.product_id.uom_id._compute_quantity(
                 move.reserved_availability, move.product_uom)
-            # key = (Product, UoM, Full split)
-            key = (move.product_id, move.product_uom, bool(move.move_orig_ids))
+            # key = (Product, UoM, Lot, Full split)
+            key = (move.product_id, move.product_uom,
+                   move.restrict_lot_id, bool(move.move_orig_ids))
             if key not in product_qty:
                 product_qty[key] = move.product_uom_qty
                 product_availability[key] = reserved_availability
@@ -107,12 +114,13 @@ class StockPickingSplit(models.TransientModel):
             if move.move_orig_ids:
                 product_availability[key] = 0
         for key, qty in product_qty.items():
-            product, uom, full_split = key
+            product, uom, lot, full_split = key
             vals = {'picking_id': self.picking_id.id,
                     'product_qty': qty,
                     'split_qty': product_availability[key],
                     'product_id': product.id,
                     'product_uom_id': uom.id,
+                    'restrict_lot_id': lot.id,
                     'full_split': full_split,
                     }
             line_ids |= self.env['stock.picking.split.line'].create(vals)
@@ -129,6 +137,11 @@ class StockPickingSplitLine(models.TransientModel):
     )
     product_uom_id = fields.Many2one(
         'product.uom', 'Unit of Measure', readonly=True
+    )
+    restrict_lot_id = fields.Many2one(
+        comodel_name="stock.production.lot",
+        string="Lot/Serial Number",
+        readonly=True,
     )
     product_qty = fields.Float(
         'Total', default=0.0,

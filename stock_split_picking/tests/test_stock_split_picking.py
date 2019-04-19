@@ -15,16 +15,23 @@ class TestStockSplitPicking(SavepointCase):
         cls.src_location = cls.env.ref('stock.stock_location_stock')
         cls.dest_location = cls.env.ref('stock.stock_location_customers')
 
-    def create_data(self, product_type='consu', multi_uom=False):
+    def create_data(
+            self, product_type='consu', multi_uom=False, with_lots=False):
         self.product = self.env['product.product'].create({
             'name': 'Test product',
             'type': product_type,
         })
+        self.lot = self.env['stock.production.lot'].browse()
         if product_type == 'product':
+            if with_lots:
+                self.lot = self.env['stock.production.lot'].create({
+                    'product_id': self.product.id,
+                })
             wiz = self.env['stock.change.product.qty'].create({
                 'location_id': self.src_location.id,
                 'product_id': self.product.id,
                 'new_quantity': 10.0,
+                'lot_id': self.lot.id,
             })
             wiz.change_product_qty()
         self.partner = self.env['res.partner'].create({
@@ -44,6 +51,7 @@ class TestStockSplitPicking(SavepointCase):
             'product_uom': self.product.uom_id.id,
             'location_id': self.src_location.id,
             'location_dest_id': self.dest_location.id,
+            'restrict_lot_id': self.lot.id,
         })
         if multi_uom:
             # Add a dozen of products
@@ -164,4 +172,26 @@ class TestStockSplitPicking(SavepointCase):
         self.assertAlmostEqual(split_move_uom_unit.product_qty, 6.0)
         self.assertAlmostEqual(split_move_uom_dozen.product_qty, 12.0)
         self.assertAlmostEqual(split_move_uom_dozen.product_uom_qty, 1.0)
+        self.assertEqual(new_picking.state, 'confirmed')
+
+    def test_stock_split_picking_confirmed_with_lots(self):
+        self.create_data(product_type='product', with_lots=True)
+        # Picking state is draft
+        self.assertEqual(self.picking.state, 'draft')
+        # Confirm picking
+        self.picking.action_confirm()
+        # Split picking: 4 and 6
+        action = self.picking.split_process()
+        wiz = self.env['stock.picking.split'].browse(action['res_id'])
+        self.assertEqual(wiz.line_ids[0].restrict_lot_id, self.lot)
+        wiz.line_ids[0].split_qty = 6  # 6 qty for the new picking
+        new_picking_id = wiz.process()
+        new_picking = self.env['stock.picking'].browse(new_picking_id)
+        # We have a picking with 4 units in state confirmed
+        self.assertEqual(self.picking.state, 'confirmed')
+        self.assertAlmostEqual(self.move.product_qty, 4)
+        # An another one with 6 units in state confirmed
+        split_move = new_picking.move_lines[0]
+        self.assertAlmostEqual(split_move.product_qty, 6.0)
+        self.assertEqual(split_move.restrict_lot_id, self.lot)
         self.assertEqual(new_picking.state, 'confirmed')
