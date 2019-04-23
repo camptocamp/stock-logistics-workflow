@@ -199,3 +199,11 @@ class StockPickingSplitLine(models.TransientModel):
                           rec.product_qty,
                     )
                 )
+            # if only a whole qty is allowed (products tracked by
+            # serial numbers)
+            if rec.product_id.tracking == 'serial' \
+                    and not rec.split_qty.is_integer():
+                raise ValidationError(
+                    _("You can only split a whole quantity for product %s  "
+                      "(%s) as it is tracked by serial numbers.") %
+                    (rec.product_id.name, rec.product_uom_id.name))
