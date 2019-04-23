@@ -88,7 +88,14 @@ class StockPickingSplit(models.TransientModel):
         if reserve:
             picking.action_assign()
             split_picking.action_assign()
-        return split_picking.id
+        return {
+            "view_type": "form",
+            "view_mode": "form",
+            "res_model": split_picking._name,
+            "res_id": split_picking.id,
+            "target": "current",
+            "type": "ir.actions.act_window",
+        }
 
     def _generate_lines(self):
         self.ensure_one()
@@ -115,8 +122,7 @@ class StockPickingSplit(models.TransientModel):
                 product_availability[key] = 0
         for key, qty in product_qty.items():
             product, uom, lot, full_split = key
-            vals = {'picking_id': self.picking_id.id,
-                    'product_qty': qty,
+            vals = {'product_qty': qty,
                     'split_qty': product_availability[key],
                     'product_id': product.id,
                     'product_uom_id': uom.id,

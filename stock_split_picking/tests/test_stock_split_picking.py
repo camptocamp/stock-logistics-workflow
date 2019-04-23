@@ -75,7 +75,7 @@ class TestStockSplitPicking(SavepointCase):
         action = self.picking.split_process()
         wiz = self.env['stock.picking.split'].browse(action['res_id'])
         wiz.line_ids.split_qty = 6  # 6 qty for the new picking
-        new_picking_id = wiz.process()
+        new_picking_id = wiz.process()['res_id']
         new_picking = self.env['stock.picking'].browse(new_picking_id)
         # We have a picking with 4 units in state confirmed
         self.assertEqual(self.picking.state, 'confirmed')
@@ -96,7 +96,7 @@ class TestStockSplitPicking(SavepointCase):
         action = self.picking.split_process()
         wiz = self.env['stock.picking.split'].browse(action['res_id'])
         wiz.line_ids[0].split_qty = 6  # 6 qty for the new picking
-        new_picking_id = wiz.process()
+        new_picking_id = wiz.process()['res_id']
         new_picking = self.env['stock.picking'].browse(new_picking_id)
         # We have a picking with 4 units in state assigned
         self.assertEqual(self.picking.state, 'assigned')
@@ -122,7 +122,7 @@ class TestStockSplitPicking(SavepointCase):
         action = self.picking.split_process()
         wiz = self.env['stock.picking.split'].browse(action['res_id'])
         wiz.line_ids[0].split_qty = 6
-        new_picking_id = wiz.process()
+        new_picking_id = wiz.process()['res_id']
         new_picking = self.env['stock.picking'].browse(new_picking_id)
         # We have a picking with 4 units in state assigned
         pack_opt = self.env['stock.pack.operation'].search(
@@ -152,7 +152,7 @@ class TestStockSplitPicking(SavepointCase):
             lambda l: l.product_uom_id == uom_unit).split_qty = 6
         wiz.line_ids.filtered(  # Assign the dozen to the new picking
             lambda l: l.product_uom_id == uom_dozen).split_qty = 1
-        new_picking_id = wiz.process()
+        new_picking_id = wiz.process()['res_id']
         new_picking = self.env['stock.picking'].browse(new_picking_id)
         # We have a picking with 4 units in state confirmed
         self.assertEqual(self.picking.state, 'confirmed')
@@ -185,7 +185,7 @@ class TestStockSplitPicking(SavepointCase):
         wiz = self.env['stock.picking.split'].browse(action['res_id'])
         self.assertEqual(wiz.line_ids[0].restrict_lot_id, self.lot)
         wiz.line_ids[0].split_qty = 6  # 6 qty for the new picking
-        new_picking_id = wiz.process()
+        new_picking_id = wiz.process()['res_id']
         new_picking = self.env['stock.picking'].browse(new_picking_id)
         # We have a picking with 4 units in state confirmed
         self.assertEqual(self.picking.state, 'confirmed')
