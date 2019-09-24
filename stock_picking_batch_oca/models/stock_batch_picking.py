@@ -63,16 +63,15 @@ class StockBatchPicking(models.Model):
 
     picking_ids = fields.One2many(
         string='Pickings',
-        # 'stock.picking', 'batch_picking_id', 'Pickings',
         readonly=True,
         states={'draft': [('readonly', False)]},
         help='List of picking managed by this batch.',
     )
     # TODO add comment to this field
     active_picking_ids = fields.One2many(
+        string="Active Pickings",
         comodel_name='stock.picking',
         inverse_name='batch_id',
-        string='Pickings',
         readonly=True,
         domain=[('state', 'not in', ('cancel', 'done'))],
     )

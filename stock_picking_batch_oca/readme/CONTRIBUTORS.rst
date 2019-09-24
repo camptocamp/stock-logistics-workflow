@@ -9,6 +9,7 @@
 * Yannick Vaucher <yannick.vaucher@camptocamp.com>
 * Alexandre Fayolle <alexandre.fayolle@camptocamp.com>
 * Joël Grand-Guillaume <joel.grandguillaume@camptocamp.com>
+* Iryna Vyshnevska <i.vyshnevska@mobilunity.com>
 
 **stock_batch_picking**
 
