@@ -222,7 +222,7 @@ class StockBatchPicking(models.Model):
         if not pickings:
             raise UserError(_('Nothing to print.'))
         return self.env.ref(
-            'stock_picking_batch_oca.action_report_batch_picking'
+            'stock_picking_batch_extended.action_report_batch_picking'
         ).report_action(self)
 
     @api.multi
