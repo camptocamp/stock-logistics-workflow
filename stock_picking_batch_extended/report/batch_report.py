@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 
 
 class ReportPrintBatchPicking(models.AbstractModel):
-    _name = 'report.stock_picking_batch_oca.report_batch_picking'
+    _name = 'report.stock_picking_batch_extended.report_batch_picking'
     _description = 'Report for Batch Picking'
 
     @api.model
