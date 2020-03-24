@@ -148,3 +148,30 @@ class TestSaleStock(TestSale):
         # the origin of the picking mentions both sales names
         self.assertTrue(so1.name in so1.picking_ids[0].origin)
         self.assertTrue(so2.name in so2.picking_ids[0].origin)
+
+    def test_printed_pick_no_merge(self):
+        """1st sale order ship is printed, 2nd sale order not merged"""
+        so1 = self._get_new_sale_order(carrier=self.carrier1)
+        so1.action_confirm()
+        so1.picking_ids.do_print_picking()
+        so2 = self._get_new_sale_order(amount=11, carrier=self.carrier1)
+        self.assertNotEqual(so1.picking_ids, so2.picking_ids)
+
+    def test_backorder_picking_merge(self):
+        """1st sale order ship is printed, 2nd sale order not merged.
+        Partial delivery of so1
+
+        -> backorder is merged with so2 picking
+
+        """
+        so1 = self._get_new_sale_order(carrier=self.carrier1)
+        so1.action_confirm()
+        so1.picking_ids.do_print_picking()
+        so2 = self._get_new_sale_order(amount=11, carrier=self.carrier1)
+        so2.action_confirm()
+        pick = so1.picking_ids
+        move = pick.move_lines[0]
+        move.quantity_done = 5
+        pick2 = pick.with_context(cancel_backorder=False)
+        pick2.action_done()
+        self.assertTrue(so2.picking_ids & so1.picking_ids)

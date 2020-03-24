@@ -65,6 +65,10 @@ class StockMove(models.Model):
             ("immediate_transfer", "=", False),
             ("state", "in", states),
         ]
+        if self.env.context.get("picking_no_copy_if_can_group"):
+            # we are in the context of the creation of a backorder:
+            # don't consider the current move's picking
+            domain.append(("id", "!=", self.picking_id.id))
         return domain
 
     def _key_assign_picking(self):
