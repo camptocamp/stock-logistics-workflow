@@ -172,6 +172,6 @@ class TestSaleStock(TestSale):
         pick = so1.picking_ids
         move = pick.move_lines[0]
         move.quantity_done = 5
-        pick2 = pick.with_context(cancel_backorder=False)
-        pick2.action_done()
+        pick.with_context(cancel_backorder=False).action_done()
         self.assertTrue(so2.picking_ids & so1.picking_ids)
+        self.assertEqual(so2.picking_ids.sale_ids, so1 + so2)
