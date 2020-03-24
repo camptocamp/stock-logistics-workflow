@@ -1,3 +1,6 @@
+from collections import namedtuple
+from itertools import groupby
+
 from odoo import api, fields, models
 
 
@@ -37,3 +40,59 @@ class StockPicking(models.Model):
         return super(
             StockPicking, self.with_context(picking_no_copy_if_can_group=0)
         ).copy(defaults)
+
+    def do_something(self):
+        return "bla bla"
+
+    def get_delivery_report_lines(self):
+        self.ensure_one()
+        if self.state != "done":
+            moves = self.move_lines.filtered("product_uom_qty").sorted(
+                lambda m: m.sale_line_id.order_id
+            )
+            if len(moves.mapped("sale_line_id.order_id")) > 1:
+                sales_and_moves = []
+                for sale, sale_moves in groupby(
+                    moves, lambda m: m.sale_line_id.order_id
+                ):
+                    sales_and_moves.append(
+                        MockedMove(
+                            product_id=False,
+                            description_picking=sale.name,
+                            product_uom_qty=0,
+                            product_uom=False,
+                        )
+                    )
+                    for move in sale_moves:
+                        sales_and_moves.append(move)
+                return sales_and_moves
+            else:
+                return moves
+        else:
+            moves = self.move_lines.sorted(lambda m: m.sale_line_id.order_id)
+            if len(moves.mapped("sale_line_id.order_id")) > 1:
+                sales_and_moves = []
+                for sale, sale_moves in groupby(
+                    moves, lambda m: m.sale_line_id.order_id
+                ):
+                    sales_and_moves.append(
+                        MockedMove(
+                            product_id=False,
+                            description_picking=sale.name,
+                            product_uom_qty=0,
+                            product_uom=False,
+                            lot_name="",
+                        )
+                    )
+                    for move in sale_moves:
+                        for move_line in move.move_line_ids:
+                            sales_and_moves.append(move_line)
+                return sales_and_moves
+            else:
+                return self.move_line_ids
+
+
+MockedMove = namedtuple(
+    "MockedMove",
+    ["product_id", "description_picking", "product_uom_qty", "product_uom", "lot_name"],
+)

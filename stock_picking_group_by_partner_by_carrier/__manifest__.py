@@ -10,7 +10,11 @@
     "website": "https://github.com/OCA/stock-logistics-workflow",
     "category": "Warehouse Management",
     "depends": ["sale_stock", "delivery"],
-    "data": ["views/stock_picking_type.xml", "views/stock_warehouse.xml"],
+    "data": [
+        "views/stock_picking_type.xml",
+        "views/stock_warehouse.xml",
+        "report/report_delivery_slip.xml",
+    ],
     "installable": True,
     "license": "AGPL-3",
 }
