@@ -59,3 +59,9 @@ class TestSaleStockMtoAsMtsOrderpoint(SavepointCase):
             [("product_id", "=", self.product.id)]
         )
         self.assertFalse(orderpoint)
+        orderpoint = (
+            self.env["stock.warehouse.orderpoint"]
+            .with_context(active_test=False)
+            .search([("product_id", "=", self.product.id)])
+        )
+        self.assertTrue(orderpoint)
