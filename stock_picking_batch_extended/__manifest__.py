@@ -33,6 +33,7 @@
         'views/res_config_settings_views.xml',
         'wizard/batch_picking_creator_view.xml',
     ],
+    'post_init_hook': 'post_init_hook',
     'installable': True,
     'license': 'AGPL-3',
 }
