@@ -90,4 +90,16 @@
             <attribute name="t-if">move_line.product_id</attribute>
         </xpath>
     </template>
+    <!-- Remove the customer reference in the header if there is more than one -->
+    <template
+        id="report_delivery_document_inherit_sale_stock"
+        inherit_id="sale_stock.report_delivery_document_inherit_sale_stock"
+    >
+        <xpath
+            expr='//div[@t-if="o.sudo().sale_id.client_order_ref"]'
+            position="attributes"
+        >
+            <attribute name="t-if">len(o.get_customer_refs())==1</attribute>
+        </xpath>
+    </template>
 </odoo>
