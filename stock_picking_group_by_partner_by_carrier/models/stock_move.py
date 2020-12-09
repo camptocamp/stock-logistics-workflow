@@ -1,33 +1,57 @@
+# Copyright 2020 Camptocamp (https://www.camptocamp.com)
+# Copyright 2020 Jacques-Etienne Baudoux (BCIM) <je@bcim.be>
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
 import re
 from collections import namedtuple
 
-from odoo import models
+from odoo import api, fields, models
 
 
 class StockMove(models.Model):
     _inherit = "stock.move"
 
+    # store the first group the move was in when created, used to keep track of
+    # original group's name when creating a joint group for merged transfers,
+    # and for cancellation of a sales order (to cancel only the moves related
+    # to it)
+    original_group_id = fields.Many2one(
+        comodel_name="procurement.group", string="Original Procurement Group",
+    )
+
+    @api.model
+    def _prepare_merge_moves_distinct_fields(self):
+        # Prevent merging pulled moves. This allows to cancel a SO without
+        # canceling pulled moves from other SO as we ensure they are not
+        # merged.
+        return super()._prepare_merge_moves_distinct_fields() + ["original_group_id"]
+
     def _assign_picking(self):
-        return super(
+        result = super(
             StockMove, self.with_context(picking_no_overwrite_partner_origin=1)
         )._assign_picking()
+        self.picking_id._merge_procurement_groups()
+        return result
 
     def _assign_picking_post_process(self, new=False):
         res = super()._assign_picking_post_process(new=new)
         if not new:
-            picking = self.mapped("picking_id")
-            picking.ensure_one()
-            sales = self.mapped("sale_line_id.order_id")
-            for sale in sales:
-                pattern = r"\b%s\b" % sale.name
-                if not re.search(pattern, picking.origin):
-                    picking.origin += " " + sale.name
-                    picking.message_post_with_view(
-                        "mail.message_origin_link",
-                        values={"self": picking, "origin": sale},
-                        subtype_id=self.env.ref("mail.mt_note").id,
-                    )
+            self._on_assign_picking_message_link()
         return res
+
+    def _on_assign_picking_message_link(self):
+        picking = self.picking_id
+        picking.ensure_one()
+        sales = self.mapped("sale_line_id.order_id")
+        for sale in sales:
+            pattern = r"\b%s\b" % sale.name
+            if not re.search(pattern, picking.origin):
+                picking.origin += " " + sale.name
+                picking.message_post_with_view(
+                    "mail.message_origin_link",
+                    values={"self": picking, "origin": sale},
+                    subtype_id=self.env.ref("mail.mt_note").id,
+                )
 
     def _search_picking_for_assignation(self):
         # totally reimplement this one to add a hook to change the domain
