@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 from odoo.exceptions import UserError
+from odoo.tests import Form
 from odoo.tests.common import TransactionCase
 
 
@@ -380,3 +381,107 @@ class TestStockPicking(TransactionCase):
         # The expected result is only opertions with product_id set and
         self.assertFalse(product_8_op.qty_done)
         self.assertTrue(product_9_op.qty_done)
+
+    def test_action_assign_replenish_stock(self):
+        # Covered case:
+        # For a product with less stock than initial demand, check after
+        # replenish stock that quantity done is written with initial demand
+        # after check availability
+        self.picking_type_in.auto_fill_operation = True
+        product = self.env["product.product"].create(
+            {"name": "Test auto fill", "type": "product"}
+        )
+        product_quant = self.env["stock.quant"].create(
+            {
+                "product_id": product.id,
+                "location_id": self.picking_type_out.default_location_src_id.id,
+                "quantity": 1000.00,
+            }
+        )
+        self.move_model.create(
+            dict(
+                product_id=product.id,
+                picking_id=self.picking.id,
+                name=product.display_name,
+                picking_type_id=self.picking_type_out.id,
+                product_uom_qty=1500.00,
+                location_id=self.picking_type_out.default_location_src_id.id,
+                location_dest_id=self.customer_location.id,
+                product_uom=product.uom_id.id,
+            )
+        )
+        self.picking.action_assign()
+        self.assertEqual(self.picking.state, "assigned")
+        self.assertEqual(len(self.picking.move_line_ids), 1)
+        # Try to fill all the operation automatically.
+        self.assertEqual(self.picking.move_line_ids.qty_done, 1000.00)
+        product_quant.quantity = 1500.00
+        self.picking.action_assign()
+        self.assertEqual(self.picking.move_line_ids.qty_done, 1500.00)
+
+    def _picking_return(self, picking, qty):
+        # Make a return from picking
+        ReturnWiz = self.env["stock.return.picking"]
+        return_form = Form(
+            ReturnWiz.with_context(
+                active_ids=picking.ids,
+                active_id=picking.ids[0],
+                active_model="stock.picking",
+            )
+        )
+        stock_return_picking = return_form.save()
+        stock_return_picking.product_return_moves.quantity = qty
+        stock_return_picking_action = stock_return_picking.create_returns()
+        return_pick = self.env["stock.picking"].browse(
+            stock_return_picking_action["res_id"]
+        )
+        return_pick.action_assign()
+        # return_pick.move_lines.quantity_done = qty
+        return_pick.action_done()
+        return return_pick
+
+    def test_return_twice(self):
+        # Covered case:
+        # Return more than one times not duplicate quant units in stock
+        self.picking_type_out.auto_fill_operation = True
+        self.picking_type_in.auto_fill_operation = True
+        product = self.env["product.product"].create(
+            {"name": "Test return", "type": "product"}
+        )
+        self.env["stock.quant"].create(
+            {
+                "product_id": product.id,
+                "location_id": self.picking_type_out.default_location_src_id.id,
+                "quantity": 500.00,
+            }
+        )
+        self.move_model.create(
+            dict(
+                product_id=product.id,
+                picking_id=self.picking_out.id,
+                name=product.display_name,
+                picking_type_id=self.picking_type_out.id,
+                product_uom_qty=500.00,
+                location_id=self.picking_type_out.default_location_src_id.id,
+                location_dest_id=self.customer_location.id,
+                product_uom=product.uom_id.id,
+            )
+        )
+        self.picking_out.action_confirm()
+        self.picking_out.action_assign()
+        # self.picking_out.move_lines.quantity_done = 500
+        self.picking_out.action_done()
+        self.assertEqual(product.qty_available, 0.0)
+
+        # Make first return from customer location to stock location
+        returned_picking = self._picking_return(self.picking_out, 500.00)
+        self.assertEqual(product.qty_available, 500)
+
+        # Make second return from stock location to customer location
+        returned_picking = self._picking_return(returned_picking, 500.00)
+        self.assertEqual(product.qty_available, 0.0)
+
+        # Make third return from customer location to stock location
+        returned_picking = self._picking_return(returned_picking, 500.00)
+
+        self.assertEqual(product.qty_available, 500)
