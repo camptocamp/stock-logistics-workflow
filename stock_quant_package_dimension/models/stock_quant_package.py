@@ -26,6 +26,24 @@ class StockQuantPackage(models.Model):
         help="volume in cubic meters",
     )
 
+    def _get_picking_move_lines(self, picking_id):
+        return self.env["stock.move.line"].search(
+            [
+                ("result_package_id", "in", self.ids),
+                ("picking_id", "=", self.env.context["picking_id"]),
+            ]
+        )
+
+    def _get_weight_from_move_lines(self, move_lines):
+        return sum(
+            ml.product_uom_id._compute_quantity(ml.qty_done, ml.product_id.uom_id)
+            * ml.product_id.weight
+            for ml in move_lines
+        )
+
+    def _get_weight_from_quants(self, quants):
+        return sum(quant.quantity * quant.product_id.weight for quant in quants)
+
     @api.depends("quant_ids")
     @api.depends_context("picking_id")
     def _compute_estimated_pack_weight(self):
@@ -34,22 +52,12 @@ class StockQuantPackage(models.Model):
         for package in self:
             weight = 0.0
             if self.env.context.get("picking_id"):
-                current_picking_move_line_ids = self.env["stock.move.line"].search(
-                    [
-                        ("result_package_id", "=", package.id),
-                        ("picking_id", "=", self.env.context["picking_id"]),
-                    ]
+                move_lines = package._get_picking_move_lines(
+                    self.env.context["picking_id"]
                 )
-                for ml in current_picking_move_line_ids:
-                    weight += (
-                        ml.product_uom_id._compute_quantity(
-                            ml.qty_done, ml.product_id.uom_id
-                        )
-                        * ml.product_id.weight
-                    )
+                weight = package._get_weight_from_move_lines(move_lines)
             else:
-                for quant in package.quant_ids:
-                    weight += quant.quantity * quant.product_id.weight
+                weight = package._get_weight_from_quants(package.quant_ids)
             package.estimated_pack_weight = weight
 
     @api.depends("lngth", "width", "height")
