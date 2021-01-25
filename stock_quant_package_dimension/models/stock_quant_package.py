@@ -26,13 +26,20 @@ class StockQuantPackage(models.Model):
         help="volume in cubic meters",
     )
 
-    def _get_picking_move_lines(self, picking_id):
-        return self.env["stock.move.line"].search(
+    def _get_picking_move_line_ids_per_package(self, picking_id):
+        if not picking_id:
+            return {}
+        move_lines = self.env["stock.move.line"].search(
             [
                 ("result_package_id", "in", self.ids),
                 ("picking_id", "=", self.env.context["picking_id"]),
             ]
         )
+        res = dict.fromkeys(self.ids, self.env["stock.move.line"])
+        for ml in move_lines:
+            res.setdefault(ml.result_package_id, set(ml.ids))
+            res[ml.result_package_id].add(ml.id)
+        return res
 
     def _get_weight_from_move_lines(self, move_lines):
         return sum(
@@ -49,12 +56,14 @@ class StockQuantPackage(models.Model):
     def _compute_estimated_pack_weight(self):
         # NOTE: copy-pasted and adapted from `delivery` module
         # because we do not want to add the dependency against 'delivery' here.
+        move_line_ids_per_package = self._get_picking_move_line_ids_per_package(
+            self.env.context.get("picking_id")
+        )
         for package in self:
             weight = 0.0
             if self.env.context.get("picking_id"):
-                move_lines = package._get_picking_move_lines(
-                    self.env.context["picking_id"]
-                )
+                move_line_ids = move_line_ids_per_package[package]
+                move_lines = self.env["stock.move.line"].browse(move_line_ids)
                 weight = package._get_weight_from_move_lines(move_lines)
             else:
                 weight = package._get_weight_from_quants(package.quant_ids)
