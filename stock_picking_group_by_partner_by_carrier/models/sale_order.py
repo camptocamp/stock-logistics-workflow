@@ -13,6 +13,10 @@ class SaleOrder(models.Model):
                 SaleOrder, sale_order.with_context(cancel_sale_id=sale_order.id)
             ).action_cancel()
 
+    def action_draft(self):
+        super().action_draft()
+        self.procurement_group_id = False
+
     def get_name_for_delivery_line(self):
         """Get the name for the sale order displayed on the delivery note"""
         self.ensure_one()
