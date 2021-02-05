@@ -18,6 +18,7 @@ class StockMove(models.Model):
     original_group_id = fields.Many2one(
         comodel_name="procurement.group", string="Original Procurement Group",
     )
+    is_fake = fields.Boolean(store=False)
 
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
