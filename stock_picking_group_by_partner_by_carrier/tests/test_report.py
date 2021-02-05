@@ -15,12 +15,12 @@ class TestReport(TestGroupByBase):
         res = picking.get_delivery_report_lines()
         self.assertEqual(len(res), 4)
         self.assertEqual(res._name, "stock.move")
-        # Check that we have two fake moves (header with sale name)
+        # Check that we have two display moves (sale name)
         # And two real moves.
-        self.assertTrue(res[0].is_fake)
-        self.assertFalse(res[1].is_fake)
-        self.assertTrue(res[2].is_fake)
-        self.assertFalse(res[3].is_fake)
+        self.assertFalse(res[0].id)
+        self.assertTrue(res[1].id)
+        self.assertFalse(res[2].id)
+        self.assertTrue(res[3].id)
         # Deliver and test again
         self._update_qty_in_location(
             picking.location_id,
@@ -42,9 +42,9 @@ class TestReport(TestGroupByBase):
         res = picking.get_delivery_report_lines()
         self.assertEqual(len(res), 4)
         self.assertEqual(res._name, "stock.move.line")
-        # Check that we have two fake move lines (header with sale name)
-        # And two real move lines.
-        self.assertTrue(res[0].is_fake)
-        self.assertFalse(res[1].is_fake)
-        self.assertTrue(res[2].is_fake)
-        self.assertFalse(res[3].is_fake)
+        # Check that we have two display moves (sale name)
+        # And two real moves.
+        self.assertFalse(res[0].id)
+        self.assertTrue(res[1].id)
+        self.assertFalse(res[2].id)
+        self.assertTrue(res[3].id)

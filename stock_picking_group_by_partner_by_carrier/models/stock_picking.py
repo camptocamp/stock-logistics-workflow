@@ -117,7 +117,7 @@ class StockPicking(models.Model):
     def get_delivery_report_lines(self):
         """Return the lines that will be on the report.
 
-        If the picking concerns multiple sale order some fake record are
+        If the picking concerns multiple sale order some fake records are
         inserted to have the sale information as line separators.
         Otherwise standard records are returned.
         """
@@ -136,7 +136,6 @@ class StockPicking(models.Model):
                 "company_id": self.env.user.company_id.id,
                 "location_id": self.env.ref("stock.stock_location_output").id,
                 "location_dest_id": self.env.ref("stock.stock_location_output").id,
-                "is_fake": True,
             }
             if self.state != "done":
                 sales_and_moves = self.env["stock.move"]
