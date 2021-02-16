@@ -89,9 +89,54 @@
         >
             <attribute name="t-if">move_line.id</attribute>
         </xpath>
-        <!-- Remove "All items could not be shipped..." sentence -->
+        <!-- Remove "All items could not be shipped..." sentence
+            Substitute it by a message indicating if all goods have been delivered. -->
         <xpath expr='//div[hasclass("page")]/p[last()]' position="attributes">
             <attribute name="t-if">False</attribute>
+        </xpath>
+        <xpath expr='//div[hasclass("page")]/p[last()]' position="after">
+            <t t-if="o.picking_type_id.code == 'outgoing'">
+                <p>Remaining to deliver:</p>
+                <t t-if="o.is_completion_order()">
+                    <p>All the ordered items were delivered.</p>
+                </t>
+                <t t-else="">
+                    <table class="table table-sm" name="remaining_to_deliver_table">
+                        <tbody>
+                            <t
+                                t-set="pending_moves"
+                                t-value="get_remaining_to_deliver_data(lines)"
+                            />
+                            <tr t-foreach="pending_moves" t-as="pending_move">
+                                <td>
+                                    <t
+                                        t-if="pending_move['is_header']"
+                                    ><![CDATA[<strong>]]></t>
+                                    <span t-esc="pending_move['concept']" />
+                                    <t
+                                        t-if="pending_move['is_header']"
+                                    ><![CDATA[</strong>]]></t>
+                                </td>
+                                <td style="text-align: right">
+                                    <t
+                                        t-if="pending_move['is_header']"
+                                    ><![CDATA[&nbsp;]]></t>
+                                    <t t-else="">
+                                        <span
+                                            t-esc="pending_move['qty']"
+                                            t-options="{'widget': 'float',
+                                                          'precision': rounding_to_precision(pending_move['move'].product_uom.rounding)}"
+                                        />
+                                        <span class="pending_move_uom_name"
+                                            t-field="pending_move['move'].product_uom.name"
+                                        />
+                                    </t>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+            </t>
         </xpath>
     </template>
     <template
