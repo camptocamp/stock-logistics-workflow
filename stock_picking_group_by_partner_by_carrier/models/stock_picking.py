@@ -171,3 +171,38 @@ class StockPicking(models.Model):
             move_lines = self.move_lines
         references = move_lines.mapped("sale_line_id.order_id.client_order_ref")
         return set(filter(None, references))
+
+    def demand_is_completed(self):
+        """Return whether the picking completes the demand
+
+        If the outgoing picking comes from a sale order, it completes the
+        demand if the order have been completed. If doesn't come from a sale
+        order, a picking completes the order if it is the last one from those
+        needed to fulfill an order.
+        """
+        self.ensure_one()
+
+        sales = self.group_id.sale_ids
+        if sales:
+            is_done = True
+            for order_line in sales.mapped("order_line"):
+                if order_line.qty_delivered != order_line.product_uom_qty:
+                    is_done = False
+                    break
+
+        else:
+            backorders = self.env["stock.picking"].search(
+                [("backorder_id", "=", self.id)]
+            )
+            if backorders:
+                # If a backorder was created, it is not the one fulfilling the
+                # order. The exception being the case in which all the other
+                # backorders are cancelled.
+                is_done = (
+                    all([backorder.state == "cancel" for backorder in backorders])
+                    and self.state == "done"
+                )
+            else:
+                is_done = self.state == "done"
+
+        return is_done
