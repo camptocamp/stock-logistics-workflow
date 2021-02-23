@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html)
 
 from odoo import api, models
-from odoo.tools import float_round
+from odoo.tools import float_is_zero, float_round
 
 
 class DeliverySlipReport(models.AbstractModel):
@@ -51,14 +51,15 @@ class DeliverySlipReport(models.AbstractModel):
                         - move.product_uom_qty
                     )
 
-                if qty:
+                uom_precision_rounding = move.product_uom.rounding
+                if not float_is_zero(qty, precision_rounding=uom_precision_rounding):
                     remaining_to_deliver_data.append(
                         {
                             "is_header": False,
                             "concept": move.product_id.name_get()[0][-1],
                             "move": move,
                             "qty": float_round(
-                                qty, precision_rounding=move.product_uom.rounding
+                                qty, precision_rounding=uom_precision_rounding
                             ),
                         }
                     )
