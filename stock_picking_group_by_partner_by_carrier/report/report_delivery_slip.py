@@ -10,7 +10,7 @@ class DeliverySlipReport(models.AbstractModel):
     _description = "Delivery Slip Report"
 
     @api.model
-    def get_remaining_to_deliver_data(self, report_lines):
+    def get_remaining_to_deliver_data(self, picking, report_lines):
         """Return dictionaries encoding pending quantities to deliver
 
         Returns a list of dictionaries, encoding the data to be displayed
@@ -30,6 +30,14 @@ class DeliverySlipReport(models.AbstractModel):
             )
 
             if not report_line.id:  # Header moves are created as mock moves.
+                # If could be that the report has a header line that is from an
+                # order that has delivered all its items, so we remove any
+                # header line that is header of no lines.
+                if (
+                    remaining_to_deliver_data
+                    and remaining_to_deliver_data[-1]["is_header"]
+                ):
+                    remaining_to_deliver_data.pop()
                 remaining_to_deliver_data.append(
                     {"is_header": True, "concept": report_line.description_picking}
                 )
@@ -63,6 +71,12 @@ class DeliverySlipReport(models.AbstractModel):
                             ),
                         }
                     )
+
+        # Last line may be a header line of a sale order with nothing pending,
+        # so we remove it if that's the case.
+        if remaining_to_deliver_data and remaining_to_deliver_data[-1]["is_header"]:
+            remaining_to_deliver_data.pop()
+
         return remaining_to_deliver_data
 
     @api.model

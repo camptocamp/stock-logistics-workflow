@@ -101,7 +101,7 @@
             <t t-if="o.picking_type_id.code == 'outgoing'">
                 <t
                     t-set="pending_moves"
-                    t-value="get_remaining_to_deliver_data(report_lines)"
+                    t-value="get_remaining_to_deliver_data(o, report_lines)"
                 />
                 <p>Remaining to deliver:</p>
                 <t t-if="not pending_moves">
