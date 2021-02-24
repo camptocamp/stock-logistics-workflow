@@ -13,8 +13,60 @@ class TestReport(TestGroupByBase):
         self._update_qty_in_location(location, product, qty)
         self.assertEqual(product.qty_available, qty)
 
-    def test_get_remaining_to_deliver_data(self):
-        """Tests the lines for remaining data to be delivered in the report"""
+    def test_get_remaining_to_deliver_data_nondelivered_line(self):
+        """One sale with two lines, one of them non delivered"""
+        report = self.env["report.stock.report_deliveryslip"]
+
+        stock_location = self.env.ref("stock.stock_location_stock")
+
+        # SO1 has 5 units of product1, we have 3 in stock;
+        # and has 7 units of product2, we have 0 in stock.
+        so = self._get_new_sale_order(amount=5)
+        prod1 = so.order_line[0].product_id
+        self.assertEqual(prod1, self.env.ref("product.product_delivery_01"))
+        prod2 = self.env.ref("product.product_delivery_02")
+        self.env["sale.order.line"].create(
+            {
+                "order_id": so.id,
+                "name": prod2.name,
+                "product_id": prod2.id,
+                "product_uom_qty": 7,
+                "product_uom": prod2.uom_id.id,
+                "price_unit": prod2.list_price,
+            }
+        )
+        self._set_qty_only_in_location(stock_location, prod1, 3)
+        self._set_qty_only_in_location(stock_location, prod2, 0)
+        self.assertEqual(len(so.order_line), 2)
+        so.action_confirm()
+
+        self.assertEqual(len(so.picking_ids), 1)
+        picking = so.picking_ids
+        report_lines = picking.get_delivery_report_lines()
+        remaining_data = report.get_remaining_to_deliver_data(picking, report_lines)
+        self.assertEqual(len(remaining_data), 0)
+
+        self.env["stock.immediate.transfer"].create(
+            {"pick_ids": [(4, picking.id)]}
+        ).process()
+        backorder_wiz = self.env["stock.backorder.confirmation"].create(
+            {"pick_ids": [(4, picking.id)]}
+        )
+        backorder_wiz.process()
+
+        report_lines = picking.get_delivery_report_lines()
+        remaining_data = report.get_remaining_to_deliver_data(picking, report_lines)
+        self.assertEqual(len(remaining_data), 3)
+
+        self.assertTrue(remaining_data[0]["is_header"])
+        self.assertEqual(remaining_data[0]["concept"], so.name)
+        self.assertFalse(remaining_data[1]["is_header"])
+        self.assertEqual(remaining_data[1]["qty"], 2)
+        self.assertFalse(remaining_data[2]["is_header"])
+        self.assertEqual(remaining_data[2]["qty"], 7)
+
+    def test_get_remaining_to_deliver_data_two_sales(self):
+        """Two sales that combine into one picking"""
         report = self.env["report.stock.report_deliveryslip"]
 
         stock_location = self.env.ref("stock.stock_location_stock")
@@ -59,6 +111,7 @@ class TestReport(TestGroupByBase):
             {"pick_ids": [(4, picking.id)]}
         )
         backorder_wiz.process()
+        report_lines = picking.get_delivery_report_lines()
         remaining_data = report.get_remaining_to_deliver_data(picking, report_lines)
         self.assertEqual(len(remaining_data), 4)
 

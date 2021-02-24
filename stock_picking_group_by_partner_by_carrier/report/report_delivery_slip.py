@@ -1,6 +1,8 @@
 # Copyright 2021 Camptocamp
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html)
 
+from collections import OrderedDict
+
 from odoo import api, models
 from odoo.tools import float_is_zero, float_round
 
@@ -10,6 +12,28 @@ class DeliverySlipReport(models.AbstractModel):
     _description = "Delivery Slip Report"
 
     @api.model
+    def _get_move_and_order(self, report_line):
+        """Return the move and sale order associated to the report line
+
+        Depending on the state of the picking, get_delivery_report_lines,
+        the method that overwrites the report lines in this module, that
+        we receive as a parameter, may return stock.move or
+        stock.move.line, so we check first.
+        """
+        move = (
+            report_line.move_id
+            if report_line._name == "stock.move.line"
+            else report_line
+        )
+        if not report_line.id:
+            sale = self.env["sale.order"].search(
+                [("name", "=", report_line.origin)], limit=1
+            )
+        else:
+            sale = move.sale_line_id.order_id
+        return move, sale
+
+    @api.model
     def get_remaining_to_deliver_data(self, picking, report_lines):
         """Return dictionaries encoding pending quantities to deliver
 
@@ -17,30 +41,17 @@ class DeliverySlipReport(models.AbstractModel):
         at the end of the delivery slip, summarising for each order the
         pending quantities for each of its lines.
         """
-        remaining_to_deliver_data = []
+        sos_data = OrderedDict()
+        last_sale_order_name = None
         for report_line in report_lines:
-            # Depending on the state of the picking, get_delivery_report_lines,
-            # the method that overwrites the report lines in this module, that
-            # we receive as a parameter, may return stock.move or
-            # stock.move.line, so we check first.
-            move = (
-                report_line.move_id
-                if report_line._name == "stock.move.line"
-                else report_line
-            )
+            move, sale = self._get_move_and_order(report_line)
 
             if not report_line.id:  # Header moves are created as mock moves.
-                # If could be that the report has a header line that is from an
-                # order that has delivered all its items, so we remove any
-                # header line that is header of no lines.
-                if (
-                    remaining_to_deliver_data
-                    and remaining_to_deliver_data[-1]["is_header"]
-                ):
-                    remaining_to_deliver_data.pop()
-                remaining_to_deliver_data.append(
+                sos_data[sale.name] = [
                     {"is_header": True, "concept": report_line.description_picking}
-                )
+                ]
+                last_sale_order_name = sale.name
+
             elif (
                 move.picking_id.picking_type_id.code == "outgoing" and move.sale_line_id
             ):
@@ -61,7 +72,20 @@ class DeliverySlipReport(models.AbstractModel):
 
                 uom_precision_rounding = move.product_uom.rounding
                 if not float_is_zero(qty, precision_rounding=uom_precision_rounding):
-                    remaining_to_deliver_data.append(
+                    if last_sale_order_name is None:
+                        # We are in the special case in which there is only one
+                        # sale order. In that case, no header line is introduced,
+                        # so the last sale order line is not yet set. We set it
+                        # here. Since there is no header, the report_line has no
+                        # field description_picking set, so we have to
+                        last_sale_order_name = report_line.origin
+                        sos_data[last_sale_order_name] = [
+                            {
+                                "is_header": True,
+                                "concept": sale.get_name_for_delivery_line(),
+                            }
+                        ]
+                    sos_data[last_sale_order_name].append(
                         {
                             "is_header": False,
                             "concept": move.product_id.name_get()[0][-1],
@@ -69,14 +93,46 @@ class DeliverySlipReport(models.AbstractModel):
                             "qty": float_round(
                                 qty, precision_rounding=uom_precision_rounding
                             ),
+                            "product": move.product_id,
+                            "uom": move.product_uom,
                         }
                     )
 
-        # Last line may be a header line of a sale order with nothing pending,
-        # so we remove it if that's the case.
-        if remaining_to_deliver_data and remaining_to_deliver_data[-1]["is_header"]:
-            remaining_to_deliver_data.pop()
+        # Maybe some sale orders had lines that were not delivered at all.
+        # We show them also as quantities that are pending to be delivered.
+        if picking.state == "done":
+            for sale in picking.group_id.sale_ids:
+                for sale_line in sale.order_line:
+                    uom_precision_rounding = sale_line.product_id.uom_id.rounding
+                    if float_is_zero(
+                        sale_line.qty_delivered,
+                        precision_rounding=uom_precision_rounding,
+                    ):
+                        if sale.name not in sos_data:
+                            sos_data[sale.name] = [
+                                {
+                                    "is_header": True,
+                                    "concept": sale.get_name_for_delivery_line(),
+                                }
+                            ]
+                        sos_data.setdefault(sale.name, []).append(
+                            {
+                                "is_header": False,
+                                "concept": sale_line.product_id.name_get()[0][-1],
+                                "qty": float_round(
+                                    sale_line.product_uom_qty,
+                                    precision_rounding=uom_precision_rounding,
+                                ),
+                                "product": sale_line.product_id,
+                                "uom": sale_line.product_id.uom_id,
+                            }
+                        )
 
+        # Filters out SOs that have nothing pending to be delivered.
+        remaining_to_deliver_data = []
+        for _, so_data in sos_data.items():
+            if len(so_data) > 1:
+                remaining_to_deliver_data.extend(so_data)
         return remaining_to_deliver_data
 
     @api.model

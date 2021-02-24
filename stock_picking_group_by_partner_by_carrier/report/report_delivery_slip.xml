@@ -125,11 +125,11 @@
                                         <span
                                             t-esc="pending_move['qty']"
                                             t-options="{'widget': 'float',
-                                                          'precision': rounding_to_precision(pending_move['move'].product_uom.rounding)}"
+                                                          'precision': rounding_to_precision(pending_move['uom'].rounding)}"
                                         />
                                         <span
                                             class="pending_move_uom_name"
-                                            t-field="pending_move['move'].product_uom.name"
+                                            t-field="pending_move['uom'].name"
                                         />
                                     </t>
                                 </td>
