@@ -99,37 +99,36 @@
         </xpath>
         <xpath expr='//div[hasclass("page")]/p[last()]' position="after">
             <t t-if="o.picking_type_id.code == 'outgoing'">
-                <t
-                    t-set="pending_moves"
-                    t-value="get_remaining_to_deliver_data(o, report_lines)"
-                />
-                <p>Remaining to deliver:</p>
-                <t t-if="not pending_moves">
-                    <p>All the ordered items were delivered.</p>
+                <t t-set="remainings" t-value="get_remaining_to_deliver(o)" />
+                <t t-if="not remainings">
+                    <p
+                        style="background-color:#C6C6C6;"
+                    >All the ordered items were delivered.</p>
                 </t>
                 <t t-else="">
+                    <p style="background-color:#C6C6C6;">Remaining to deliver:</p>
                     <table class="table table-sm" name="remaining_to_deliver_table">
                         <tbody>
-                            <tr t-foreach="pending_moves" t-as="pending_move">
+                            <tr t-foreach="remainings" t-as="remaining">
                                 <td>
                                     <t
-                                        t-if="pending_move['is_header']"
+                                        t-if="remaining['is_header']"
                                     ><![CDATA[<strong>]]></t>
-                                    <span t-esc="pending_move['concept']" />
+                                    <span t-esc="remaining['concept']" />
                                     <t
-                                        t-if="pending_move['is_header']"
+                                        t-if="remaining['is_header']"
                                     ><![CDATA[</strong>]]></t>
                                 </td>
                                 <td style="text-align: right">
-                                    <t t-if="not pending_move['is_header']">
+                                    <t t-if="not remaining['is_header']">
                                         <span
-                                            t-esc="pending_move['qty']"
+                                            t-esc="remaining['qty']"
                                             t-options="{'widget': 'float',
-                                                          'precision': rounding_to_precision(pending_move['uom'].rounding)}"
+                                                          'precision': rounding_to_precision(remaining['uom'].rounding)}"
                                         />
                                         <span
-                                            class="pending_move_uom_name"
-                                            t-field="pending_move['uom'].name"
+                                            class="remaining_uom_name"
+                                            t-field="remaining['uom'].name"
                                         />
                                     </t>
                                 </td>
