@@ -13,7 +13,7 @@ class TestReport(TestGroupByBase):
         self._update_qty_in_location(location, product, qty)
         self.assertEqual(product.qty_available, qty)
 
-    def test_get_remaining_to_deliver_data_nondelivered_line(self):
+    def test_get_remaining_to_deliver_nondelivered_line(self):
         """One sale with two lines, one of them non delivered"""
         report = self.env["report.stock.report_deliveryslip"]
 
@@ -42,8 +42,7 @@ class TestReport(TestGroupByBase):
 
         self.assertEqual(len(so.picking_ids), 1)
         picking = so.picking_ids
-        report_lines = picking.get_delivery_report_lines()
-        remaining_data = report.get_remaining_to_deliver_data(picking, report_lines)
+        remaining_data = report.get_remaining_to_deliver(picking)
         self.assertEqual(len(remaining_data), 0)
 
         self.env["stock.immediate.transfer"].create(
@@ -54,8 +53,7 @@ class TestReport(TestGroupByBase):
         )
         backorder_wiz.process()
 
-        report_lines = picking.get_delivery_report_lines()
-        remaining_data = report.get_remaining_to_deliver_data(picking, report_lines)
+        remaining_data = report.get_remaining_to_deliver(picking)
         self.assertEqual(len(remaining_data), 3)
 
         self.assertTrue(remaining_data[0]["is_header"])
@@ -65,7 +63,7 @@ class TestReport(TestGroupByBase):
         self.assertFalse(remaining_data[2]["is_header"])
         self.assertEqual(remaining_data[2]["qty"], 7)
 
-    def test_get_remaining_to_deliver_data_two_sales(self):
+    def test_get_remaining_to_deliver_two_sales(self):
         """Two sales that combine into one picking"""
         report = self.env["report.stock.report_deliveryslip"]
 
@@ -100,8 +98,7 @@ class TestReport(TestGroupByBase):
         picking = so1.picking_ids
         self.assertEqual(len(picking.move_line_ids), 2)
 
-        report_lines = picking.get_delivery_report_lines()
-        remaining_data = report.get_remaining_to_deliver_data(picking, report_lines)
+        remaining_data = report.get_remaining_to_deliver(picking)
         self.assertEqual(len(remaining_data), 0)
 
         self.env["stock.immediate.transfer"].create(
@@ -111,8 +108,7 @@ class TestReport(TestGroupByBase):
             {"pick_ids": [(4, picking.id)]}
         )
         backorder_wiz.process()
-        report_lines = picking.get_delivery_report_lines()
-        remaining_data = report.get_remaining_to_deliver_data(picking, report_lines)
+        remaining_data = report.get_remaining_to_deliver(picking)
         self.assertEqual(len(remaining_data), 4)
 
         self.assertTrue(remaining_data[0]["is_header"])
