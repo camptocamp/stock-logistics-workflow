@@ -12,128 +12,69 @@ class DeliverySlipReport(models.AbstractModel):
     _description = "Delivery Slip Report"
 
     @api.model
-    def _get_move_and_order(self, report_line):
-        """Return the move and sale order associated to the report line
-
-        Depending on the state of the picking, get_delivery_report_lines,
-        the method that overwrites the report lines in this module, that
-        we receive as a parameter, may return stock.move or
-        stock.move.line, so we check first.
-        """
-        move = (
-            report_line.move_id
-            if report_line._name == "stock.move.line"
-            else report_line
-        )
-        if not report_line.id:
-            sale = self.env["sale.order"].search(
-                [("name", "=", report_line.origin)], limit=1
-            )
-        else:
-            sale = move.sale_line_id.order_id
-        return move, sale
-
-    @api.model
-    def get_remaining_to_deliver_data(self, picking, report_lines):
+    def _get_remaining_to_deliver(self, picking):
         """Return dictionaries encoding pending quantities to deliver
 
-        Returns a list of dictionaries, encoding the data to be displayed
-        at the end of the delivery slip, summarising for each order the
-        pending quantities for each of its lines.
+        Returns a list of dictionaries per sales order, encoding the data
+        to be displayed at the end of the delivery slip, summarising for
+        each order the pending quantities for each of its lines.
         """
-        sos_data = OrderedDict()
-        last_sale_order_name = None
-        for report_line in report_lines:
-            move, sale = self._get_move_and_order(report_line)
+        stock_move = self.env["stock.move"]
 
-            if not report_line.id:  # Header moves are created as mock moves.
-                sos_data[sale.name] = [
-                    {"is_header": True, "concept": report_line.description_picking}
-                ]
-                last_sale_order_name = sale.name
-
-            elif (
-                move.picking_id.picking_type_id.code == "outgoing" and move.sale_line_id
+        sales_data = OrderedDict()
+        for sale in picking.group_id.sale_ids:
+            order_name = sale.get_name_for_delivery_line()
+            for line in sale.order_line.filtered(
+                lambda l: not l.display_type and l.product_id.type != "service"
             ):
-                sol = move.sale_line_id
-                picking_state = move.picking_id.state
-                qty = None
-                if picking_state == "done":
-                    qty = sol.product_uom._compute_quantity(
-                        sol.product_uom_qty - sol.qty_delivered, move.product_uom
-                    )
-                elif picking_state not in {"cancel", "done"}:
+                move = stock_move.search(
+                    [("sale_line_id", "=", line.id), ("picking_id", "=", picking.id)],
+                    limit=1,
+                )
+                qty = 0
+                if picking.state == "done" or not move:
+                    # If the picking is done, or if the line is not in any move
+                    # of this picking, we rely only in the sales order.
+                    qty = line.product_uom_qty - line.qty_delivered
+                elif picking.state not in ("cancel", "done"):
+                    # Else, we consider the amount reserved in the move.
                     qty = (
-                        sol.product_uom._compute_quantity(
-                            sol.product_uom_qty - sol.qty_delivered, move.product_uom
-                        )
-                        - move.product_uom_qty
+                        line.product_uom_qty - line.qty_delivered - move.product_uom_qty
                     )
 
-                uom_precision_rounding = move.product_uom.rounding
-                if not float_is_zero(qty, precision_rounding=uom_precision_rounding):
-                    if last_sale_order_name is None:
-                        # We are in the special case in which there is only one
-                        # sale order. In that case, no header line is introduced,
-                        # so the last sale order line is not yet set. We set it
-                        # here. Since there is no header, the report_line has no
-                        # field description_picking set, so we have to
-                        last_sale_order_name = report_line.origin
-                        sos_data[last_sale_order_name] = [
-                            {
-                                "is_header": True,
-                                "concept": sale.get_name_for_delivery_line(),
-                            }
+                uom = move.product_uom if move else line.product_uom
+                uom_rounding = uom.rounding
+                if not float_is_zero(qty, precision_rounding=uom_rounding):
+                    if order_name not in sales_data:
+                        sales_data[order_name] = [
+                            {"is_header": True, "concept": order_name}
                         ]
-                    sos_data[last_sale_order_name].append(
+                    sales_data[order_name].append(
                         {
                             "is_header": False,
-                            "concept": move.product_id.name_get()[0][-1],
-                            "move": move,
-                            "qty": float_round(
-                                qty, precision_rounding=uom_precision_rounding
-                            ),
-                            "product": move.product_id,
-                            "uom": move.product_uom,
+                            "concept": line.product_id.name_get()[0][-1],
+                            "qty": float_round(qty, precision_rounding=uom_rounding),
+                            "product": line.product_id,
+                            "uom": uom,
+                            "sale_order_line": line,
                         }
                     )
 
-        # Maybe some sale orders had lines that were not delivered at all.
-        # We show them also as quantities that are pending to be delivered.
-        if picking.state == "done":
-            for sale in picking.group_id.sale_ids:
-                for sale_line in sale.order_line:
-                    uom_precision_rounding = sale_line.product_id.uom_id.rounding
-                    if float_is_zero(
-                        sale_line.qty_delivered,
-                        precision_rounding=uom_precision_rounding,
-                    ):
-                        if sale.name not in sos_data:
-                            sos_data[sale.name] = [
-                                {
-                                    "is_header": True,
-                                    "concept": sale.get_name_for_delivery_line(),
-                                }
-                            ]
-                        sos_data.setdefault(sale.name, []).append(
-                            {
-                                "is_header": False,
-                                "concept": sale_line.product_id.name_get()[0][-1],
-                                "qty": float_round(
-                                    sale_line.product_uom_qty,
-                                    precision_rounding=uom_precision_rounding,
-                                ),
-                                "product": sale_line.product_id,
-                                "uom": sale_line.product_id.uom_id,
-                            }
-                        )
+        return sales_data
 
-        # Filters out SOs that have nothing pending to be delivered.
-        remaining_to_deliver_data = []
-        for _, so_data in sos_data.items():
-            if len(so_data) > 1:
-                remaining_to_deliver_data.extend(so_data)
-        return remaining_to_deliver_data
+    @api.model
+    def get_remaining_to_deliver(self, picking):
+        sales_data = self._get_remaining_to_deliver(picking)
+
+        # Check: being sales_data an *ordered* dictonary, maybe .values()
+        #        returns the items in orders, so would be as easy as:
+        #        `return sales_data.values()`
+        remaining_to_deliver = []
+        for _, sale_data in sales_data.items():
+            # Remove those orders having just the line of the title.
+            if len(sale_data) > 1:
+                remaining_to_deliver.extend(sale_data)
+        return remaining_to_deliver
 
     @api.model
     def rounding_to_precision(self, rounding):
@@ -155,7 +96,7 @@ class DeliverySlipReport(models.AbstractModel):
             "doc_ids": docids,
             "doc_model": "stock.picking",
             "docs": docs,
-            "get_remaining_to_deliver_data": self.get_remaining_to_deliver_data,
+            "get_remaining_to_deliver": self.get_remaining_to_deliver,
             "rounding_to_precision": self.rounding_to_precision,
             "data": data.get("form", False),
         }
