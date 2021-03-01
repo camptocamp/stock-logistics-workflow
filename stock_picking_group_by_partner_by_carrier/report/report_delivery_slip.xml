@@ -103,7 +103,7 @@
                 <t t-if="not remainings">
                     <p
                         style="background-color:#C6C6C6;"
-                    >All the ordered items were delivered.</p>
+                    >All ordered items have been delivered.</p>
                 </t>
                 <t t-else="">
                     <p style="background-color:#C6C6C6;">Remaining to deliver:</p>
