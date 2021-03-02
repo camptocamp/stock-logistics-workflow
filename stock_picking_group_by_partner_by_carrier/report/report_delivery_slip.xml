@@ -102,22 +102,19 @@
                 <t t-set="remainings" t-value="get_remaining_to_deliver(o)" />
                 <t t-if="not remainings">
                     <p
-                        style="background-color:#C6C6C6;"
+                        class="remaining-to-deliver-separator"
                     >All ordered items have been delivered.</p>
                 </t>
                 <t t-else="">
-                    <p style="background-color:#C6C6C6;">Remaining to deliver:</p>
+                    <p class="remaining-to-deliver-separator">Remaining to deliver:</p>
                     <table class="table table-sm" name="remaining_to_deliver_table">
                         <tbody>
                             <tr t-foreach="remainings" t-as="remaining">
                                 <td>
-                                    <t
-                                        t-if="remaining['is_header']"
-                                    ><![CDATA[<strong>]]></t>
-                                    <span t-esc="remaining['concept']" />
-                                    <t
-                                        t-if="remaining['is_header']"
-                                    ><![CDATA[</strong>]]></t>
+                                    <span
+                                        t-att-class="'font-weight-bold' if remaining['is_header'] else None"
+                                        t-esc="remaining['concept']"
+                                    />
                                 </td>
                                 <td style="text-align: right">
                                     <t t-if="not remaining['is_header']">
