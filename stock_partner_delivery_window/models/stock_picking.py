@@ -7,25 +7,21 @@ from odoo.tools.misc import format_datetime
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
-    def _planned_delivery_date(self):
-        return self.scheduled_date
-
     @api.onchange("scheduled_date")
     def _onchange_scheduled_date(self):
         self.ensure_one()
-        if (
-            not self.partner_id
-            or self.partner_id.delivery_time_preference != "time_windows"
-            or self.picking_type_id.code != "outgoing"
-        ):
+        partner = self.partner_id
+        anytime_delivery = partner and partner.delivery_time_preference == "anytime"
+        outgoing_picking = self.picking_type_id.code == "outgoing_picking"
+        # Return nothing if partner delivery preference is anytime
+        if not partner or anytime_delivery or outgoing_picking:
             return
-        p = self.partner_id
-        if not p.is_in_delivery_window(self._planned_delivery_date()):
+        if not partner.is_in_delivery_window(self.scheduled_date):
             return {"warning": self._scheduled_date_no_delivery_window_match_msg()}
 
     def _scheduled_date_no_delivery_window_match_msg(self):
         delivery_windows_strings = []
-        for w in self.partner_id.get_delivery_windows().get(self.partner_id.id):
+        for w in self.partner_id.get_delivery_windows():
             delivery_windows_strings.append(
                 "  * {} ({})".format(w.display_name, self.partner_id.tz)
             )
