@@ -20,20 +20,29 @@ class StockPicking(models.Model):
             return {"warning": self._scheduled_date_no_delivery_window_match_msg()}
 
     def _scheduled_date_no_delivery_window_match_msg(self):
-        delivery_windows_strings = []
-        for w in self.partner_id.get_delivery_windows():
-            delivery_windows_strings.append(
-                "  * {} ({})".format(w.display_name, self.partner_id.tz)
+        scheduled_date = self.scheduled_date
+        formatted_scheduled_date = format_datetime(self.env, scheduled_date)
+        partner = self.partner_id
+        if partner.delivery_time_preference == "workdays":
+            message = _(
+                "The scheduled date is {} ({}), but the partner is "
+                "set to prefer deliveries on working days."
+            ).format(formatted_scheduled_date, scheduled_date.weekday())
+        else:
+            delivery_windows_strings = []
+            for w in self.partner_id.get_delivery_windows():
+                delivery_windows_strings.append(
+                    "  * {} ({})".format(w.display_name, self.partner_id.tz)
+                )
+            message = _(
+                "The scheduled date is %s (%s), but the partner is "
+                "set to prefer deliveries on following time windows:\n%s"
+                % (
+                    format_datetime(self.env, self.scheduled_date),
+                    self.env.context.get("tz"),
+                    "\n".join(delivery_windows_strings),
+                )
             )
-        message = _(
-            "The scheduled date is %s (%s), but the partner is "
-            "set to prefer deliveries on following time windows:\n%s"
-            % (
-                format_datetime(self.env, self.scheduled_date),
-                self.env.context.get("tz"),
-                "\n".join(delivery_windows_strings),
-            )
-        )
         return {
             "title": _(
                 "Scheduled date does not match partner's Delivery window preference."
