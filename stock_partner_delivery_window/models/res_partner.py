@@ -57,13 +57,19 @@ class ResPartner(models.Model):
         :param day: The day name (see time.weekday, ex: 0,1,2,...)
         :return: dict partner_id: delivery_window recordset
         """
-        self.ensure_one()
+        res = {}
         domain = [("partner_id", "in", self.ids)]
         if day_name is not None:
             week_day_id = self.env["time.weekday"]._get_id_by_name(day_name)
             domain.append(("time_window_weekday_ids", "in", week_day_id))
         windows = self.env["partner.delivery.time.window"].search(domain)
-        return windows
+        for window in windows:
+            if not res.get(window.partner_id.id):
+                res[window.partner_id.id] = self.env[
+                    "partner.delivery.time.window"
+                ].browse()
+            res[window.partner_id.id] |= window
+        return res
 
     def is_in_delivery_window(self, date_time):
         """
@@ -77,21 +83,23 @@ class ResPartner(models.Model):
             if date_time.weekday() > 4:
                 return False
             return True
-        for w in self.get_delivery_windows(date_time.weekday()):
-            start_time = w.get_time_window_start_time()
-            end_time = w.get_time_window_end_time()
-            if self.tz:
-                utc_start = tz_utils.tz_to_utc_time(self.tz, start_time)
-                utc_end = tz_utils.tz_to_utc_time(self.tz, end_time)
-            else:
-                utc_start = start_time
-                utc_end = end_time
-            if utc_start <= date_time.time() < utc_end:
-                return True
+        windows = self.get_delivery_windows(date_time.weekday()).get(self.id)
+        if windows:
+            for w in windows:
+                start_time = w.get_time_window_start_time()
+                end_time = w.get_time_window_end_time()
+                if self.tz:
+                    utc_start = tz_utils.tz_to_utc_time(self.tz, start_time)
+                    utc_end = tz_utils.tz_to_utc_time(self.tz, end_time)
+                else:
+                    utc_start = start_time
+                    utc_end = end_time
+                if utc_start <= date_time.time() < utc_end:
+                    return True
         return False
 
     def _get_delivery_time_format_string(self):
-        return _("From {} to {}")
+        return _("From %s to %s")
 
     def get_delivery_time_description(self):
         res = dict()
@@ -115,15 +123,16 @@ class ResPartner(models.Model):
                         start = win.get_time_window_start_time()
                         end = win.get_time_window_end_time()
                         translated_day = day_translated_values[day.name]
-                        value = time_format_string.format(
-                            short_format_time(start), short_format_time(end),
+                        value = time_format_string % (
+                            short_format_time(start),
+                            short_format_time(end),
                         )
                         opening_times[translated_day].append(value)
             elif partner.delivery_time_preference == "workdays":
                 day_windows = weekdays.filtered(lambda d: d.name in WORKDAYS)
                 for day in day_windows:
                     translated_day = day_translated_values[day.name]
-                    value = time_format_string.format(
+                    value = time_format_string % (
                         short_format_time(time(hour=0, minute=0)),
                         short_format_time(time(hour=23, minute=59)),
                     )
@@ -131,7 +140,7 @@ class ResPartner(models.Model):
             else:
                 for day in weekdays:
                     translated_day = day_translated_values[day.name]
-                    value = time_format_string.format(
+                    value = time_format_string % (
                         short_format_time(time(hour=0, minute=0)),
                         short_format_time(time(hour=23, minute=59)),
                     )

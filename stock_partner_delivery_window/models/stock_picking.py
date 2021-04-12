@@ -33,7 +33,7 @@ class StockPicking(models.Model):
             ).format(formatted_scheduled_date, scheduled_date.weekday())
         else:
             delivery_windows_strings = []
-            for w in self.partner_id.get_delivery_windows():
+            for w in self.partner_id.get_delivery_windows().get(partner.id):
                 delivery_windows_strings.append(
                     "  * {} ({})".format(w.display_name, self.partner_id.tz)
                 )
