@@ -101,11 +101,6 @@ class StockMove(models.Model):
         return [("move_type", "=", self.group_id.move_type)]
 
     def _key_assign_picking(self):
-        if (
-            not self.picking_id.picking_type_id.group_pickings
-            and self.picking_id.partner_id.disable_picking_grouping
-        ):
-            return super()._key_assign_picking()
         return (
             self.sale_line_id.order_id.partner_shipping_id,
             PickingPolicy(id=self.sale_line_id.order_id.picking_policy),
