@@ -124,6 +124,10 @@ class StockPicking(models.Model):
             or self.partner_id.disable_picking_grouping
         )
 
+    def _group_moves_by_order(self, moves):
+        # Meant to be overridden
+        return groupby(moves, lambda m: m.sale_line_id.order_id)
+
     def get_delivery_report_lines(self):
         """Return the lines that will be on the report.
 
@@ -138,7 +142,7 @@ class StockPicking(models.Model):
         moves = moves.sorted(lambda m: m.sale_line_id.order_id)
 
         if len(moves.mapped("sale_line_id.order_id")) > 1:
-            grouped_moves = groupby(moves, lambda m: m.sale_line_id.order_id)
+            grouped_moves = self._group_moves_by_order(moves)
             fake_record = {
                 "product_id": 1,
                 "product_uom_qty": 0,
