@@ -11,6 +11,10 @@ class StockQuantPackage(models.Model):
 
     def _compute_has_lq_products(self):
         for record in self:
-            record.has_lq_products = any(
-                record.mapped("quant_ids.product_id.is_lq_product")
-            )
+            record.has_lq_products = record._has_lq_products()
+
+    def _has_lq_products(self):
+        self.ensure_one()
+        for quant in self.quant_ids:
+            if quant.product_id.is_lq_product:
+                return True

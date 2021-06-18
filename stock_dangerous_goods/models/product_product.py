@@ -7,7 +7,10 @@ from odoo import fields, models
 class ProductProduct(models.Model):
     _inherit = "product.product"
 
-    is_lq_product = fields.Boolean(compute="_compute_is_lq_product")
+    is_lq_product = fields.Boolean(
+        compute="_compute_is_lq_product",
+        help="Whether this product is a Limited Quantity product or not",
+    )
 
     def _compute_is_lq_product(self):
         limited_amount_lq = self.env.ref("l10n_eu_product_adr.limited_amount_1")
