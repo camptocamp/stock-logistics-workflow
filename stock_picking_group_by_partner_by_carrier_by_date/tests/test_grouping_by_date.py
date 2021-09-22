@@ -86,3 +86,14 @@ class TestGroupByDate(TestGroupByDateBase):
             p9, p10 = self._create_orders_and_pickings()
             self.assertEqual(p9, p10)
             self.assertNotEqual(p9, p1)
+
+    def test_group_by_date_same_day_different_time(self):
+        with freeze_time("2020-11-27 12:00:00"):
+            order1 = self._create_order(partner=self.partner)
+            order1.action_confirm()
+            picking1 = order1.picking_ids
+        with freeze_time("2020-11-27 12:00:01"):
+            order2 = self._create_order(partner=self.partner)
+            order2.action_confirm()
+            picking2 = order2.picking_ids
+        self.assertEqual(picking1, picking2)
