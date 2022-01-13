@@ -16,4 +16,5 @@
     ],
     "installable": True,
     "license": "AGPL-3",
+    "pre_init_hook": "migrate",
 }
