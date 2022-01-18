@@ -1,10 +1,17 @@
 # Copyright 2022 Jacques-Etienne Baudoux (BCIM) <je@bcim.be>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl)
 
-from openupgradelib import openupgrade
+import logging
+
+_logger = logging.getLogger(__name__)
+
+try:
+    from openupgradelib import openupgrade
+except ImportError as err:
+    _logger.debug(err)
 
 
-def migrate(cr):
+def migrate(cr, version):
     """Extract feature to this module"""
     openupgrade.update_module_moved_fields(
         cr,
