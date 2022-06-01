@@ -82,10 +82,8 @@ class TestStockPickingInvoiceLink(TestSaleCommon):
 
     def test_00_sale_stock_invoice_link(self):
         pick_obj = self.env["stock.picking"]
-        inv_obj = self.env["account.invoice"]
         # invoice on order
-        inv_id = self.so.action_invoice_create()
-        inv_0 = inv_obj.browse(inv_id)
+        inv_0 = self.so._create_invoices()
         # deliver partially
         self.assertEqual(
             self.so.invoice_status,
@@ -184,7 +182,7 @@ class TestStockPickingInvoiceLink(TestSaleCommon):
         # Invoice view
         result = pick_1.action_view_invoice()
         self.assertEqual(result["views"][0][1], "tree")
-        self.assertEqual(pick_1.invoice_ids, inv_1 | inv_0)
+        self.assertEqual(pick_1.invoice_ids.ids, (inv_0 | inv_1).ids)
         # Mock multiple invoices linked to a picking
         inv_3 = inv_1.copy()
         inv_3.picking_ids |= pick_1
