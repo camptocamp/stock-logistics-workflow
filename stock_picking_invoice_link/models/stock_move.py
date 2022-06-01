@@ -43,7 +43,7 @@ class StockMove(models.Model):
                 and not (
                     any(
                         inv.state != "cancel"
-                        for inv in x.invoice_line_ids.mapped("invoice_id")
+                        for inv in x.invoice_line_ids.mapped("move_id")
                     )
                 )
                 and not x.scrapped
@@ -54,8 +54,8 @@ class StockMove(models.Model):
             )
         )
 
-    def _action_done(self):
-        res = super()._action_done()
+    def _action_done(self, cancel_backorder=False):
+        res = super()._action_done(cancel_backorder)
         precision = self.env["decimal.precision"].precision_get(
             "Product Unit of Measure"
         )
