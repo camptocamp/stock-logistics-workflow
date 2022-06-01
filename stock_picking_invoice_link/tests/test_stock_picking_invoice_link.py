@@ -82,9 +82,9 @@ class TestStockPickingInvoiceLink(TestSaleCommon):
 
     def test_00_sale_stock_invoice_link(self):
         pick_obj = self.env["stock.picking"]
-        inv_obj = self.env["account.invoice"]
+        inv_obj = self.env["account.move"]
         # invoice on order
-        inv_id = self.so.action_invoice_create()
+        inv_id = self.so._create_invoices()
         inv_0 = inv_obj.browse(inv_id)
         # deliver partially
         self.assertEqual(
