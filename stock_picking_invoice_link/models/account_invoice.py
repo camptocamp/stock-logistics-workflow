@@ -11,8 +11,8 @@ class AccountInvoice(models.Model):
     _inherit = "account.invoice"
 
     picking_ids = fields.Many2many(
-        comodel_name='stock.picking',
-        string='Related Pickings',
+        comodel_name="stock.picking",
+        string="Related Pickings",
         compute="_compute_picking_ids",
         relation="account_invoice_stock_picking_rel",
         column1="account_invoice_id",
@@ -21,23 +21,21 @@ class AccountInvoice(models.Model):
         copy=False,
         store=True,
         help="Related pickings "
-             "(only when the invoice has been generated from a sale order).",
+        "(only when the invoice has been generated from a sale order).",
     )
 
     @api.depends("invoice_line_ids.move_line_ids.picking_id")
     def _compute_picking_ids(self):
         for inv in self:
-            inv.picking_ids = inv.invoice_line_ids.mapped(
-                "move_line_ids.picking_id"
-            )
+            inv.picking_ids = inv.invoice_line_ids.mapped("move_line_ids.picking_id")
 
     @api.model
     def _refund_cleanup_lines(self, lines):
         result = super()._refund_cleanup_lines(lines)
-        if self.env.context.get('mode') == 'modify':
+        if self.env.context.get("mode") == "modify":
             for i, line in enumerate(lines):
-                for name, field in line._fields.items():
-                    if name == 'move_line_ids':
+                for name, _field in line._fields.items():
+                    if name == "move_line_ids":
                         result[i][2][name] = [(6, 0, line[name].ids)]
                         line[name] = False
         return result
@@ -47,12 +45,12 @@ class AccountInvoiceLine(models.Model):
     _inherit = "account.invoice.line"
 
     move_line_ids = fields.Many2many(
-        comodel_name='stock.move',
-        relation='stock_move_invoice_line_rel',
-        column1='invoice_line_id',
-        column2='move_id',
-        string='Related Stock Moves',
+        comodel_name="stock.move",
+        relation="stock_move_invoice_line_rel",
+        column1="invoice_line_id",
+        column2="move_id",
+        string="Related Stock Moves",
         readonly=True,
         help="Related stock moves "
-             "(only when the invoice has been generated from a sale order).",
+        "(only when the invoice has been generated from a sale order).",
     )
