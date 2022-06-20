@@ -83,7 +83,7 @@ class TestStockPickingInvoiceLink(TestSaleCommon):
     def test_00_sale_stock_invoice_link(self):
         pick_obj = self.env["stock.picking"]
         # invoice on order
-        self.so._create_invoices()
+        inv_0 = self.so._create_invoices()
         # deliver partially
         self.assertEqual(
             self.so.invoice_status,
@@ -144,6 +144,20 @@ class TestStockPickingInvoiceLink(TestSaleCommon):
         )
         # Check links
         self.assertEqual(
+            inv_0.picking_ids,
+            pick_1 | pick_2,
+            "Invoice 0 must be linked to all the deliveries",
+        )
+        self.assertEqual(
+            inv_0.invoice_line_ids.mapped("move_line_ids"),
+            pick_1.move_lines.filtered(lambda x: x.product_id.invoice_policy == "order")
+            | pick_2.move_lines.filtered(
+                lambda x: x.product_id.invoice_policy == "order"
+            ),
+            "Invoice 0 lines must be link to all delivery lines for "
+            "ordered quantities",
+        )
+        self.assertEqual(
             inv_1.picking_ids,
             pick_1,
             "Invoice 1 must link to only First Partial Delivery",
@@ -168,7 +182,7 @@ class TestStockPickingInvoiceLink(TestSaleCommon):
         # Invoice view
         result = pick_1.action_view_invoice()
         self.assertEqual(result["views"][0][1], "form")
-        self.assertEqual(result["res_id"], inv_1.id)
+        self.assertEqual(pick_1.invoice_ids.ids, (inv_0 | inv_1).ids)
         # Mock multiple invoices linked to a picking
         inv_3 = inv_1.copy()
         inv_3.picking_ids |= pick_1

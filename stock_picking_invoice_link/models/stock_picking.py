@@ -11,7 +11,10 @@ class StockPicking(models.Model):
     _inherit = "stock.picking"
 
     invoice_ids = fields.Many2many(
-        comodel_name="account.move", copy=False, string="Invoices", readonly=True
+        comodel_name="account.invoice",
+        copy=False,
+        string="Invoices",
+        readonly=True,
     )
 
     def action_view_invoice(self):
