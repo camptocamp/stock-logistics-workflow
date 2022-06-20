@@ -181,7 +181,7 @@ class TestStockPickingInvoiceLink(TestSaleCommon):
         )
         # Invoice view
         result = pick_1.action_view_invoice()
-        self.assertEqual(result["views"][0][1], "tree")
+        self.assertEqual(result["views"][0][1], "form")
         self.assertEqual(pick_1.invoice_ids.ids, (inv_0 | inv_1).ids)
         # Mock multiple invoices linked to a picking
         inv_3 = inv_1.copy()

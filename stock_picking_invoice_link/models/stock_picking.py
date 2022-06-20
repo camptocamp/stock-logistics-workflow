@@ -15,9 +15,6 @@ class StockPicking(models.Model):
         copy=False,
         string="Invoices",
         readonly=True,
-        relation="account_invoice_stock_picking_rel",
-        column1="stock_picking_id",
-        column2="account_invoice_id",
     )
 
     def action_view_invoice(self):
