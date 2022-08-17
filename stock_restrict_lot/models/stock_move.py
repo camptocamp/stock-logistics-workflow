@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
+
+>>>>>>> [FIX] stock_restrict_lot: do not merge stock move with different restrict_lot_id
 from odoo import _, api, exceptions, fields, models
 
 

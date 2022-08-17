@@ -61,6 +61,7 @@ class TestRestrictLot(TransactionCase):
         self.assertFalse(other_move.restrict_lot_id.id)
 
     def _update_product_stock(self, qty, lot_id=False, location=None):
+<<<<<<< HEAD
         quant = self.env["stock.quant"].create(
             {
                 "product_id": self.product.id,
@@ -69,6 +70,28 @@ class TestRestrictLot(TransactionCase):
                 ),
                 "lot_id": lot_id,
                 "inventory_quantity": qty,
+=======
+        inventory = self.env["stock.inventory"].create(
+            {
+                "name": "Test Inventory",
+                "product_ids": [(6, 0, self.product.ids)],
+                "state": "confirm",
+                "line_ids": [
+                    (
+                        0,
+                        0,
+                        {
+                            "product_qty": qty,
+                            "location_id": location.id
+                            if location
+                            else self.warehouse.lot_stock_id.id,
+                            "product_id": self.product.id,
+                            "product_uom_id": self.product.uom_id.id,
+                            "prod_lot_id": lot_id,
+                        },
+                    )
+                ],
+>>>>>>> [FIX] stock_restrict_lot: do not merge stock move with different restrict_lot_id
             }
         )
         quant.action_apply_inventory()
@@ -118,9 +141,16 @@ class TestRestrictLot(TransactionCase):
         )
         warehouse.delivery_steps = "pick_ship"
 
+<<<<<<< HEAD
         self.product.categ_id.route_ids |= self.env["stock.route"].search(
             [("name", "ilike", "deliver in 2")]
         )
+=======
+        self.product.categ_id.route_ids |= self.env["stock.location.route"].search(
+            [("name", "ilike", "deliver in 2")]
+        )
+        # self.env["stock.warehouse"].write(dict(delivery_steps='pick_ship',))
+>>>>>>> [FIX] stock_restrict_lot: do not merge stock move with different restrict_lot_id
         location_1 = self.env["stock.location"].create(
             {"name": "loc1", "location_id": warehouse.lot_stock_id.id}
         )
@@ -129,7 +159,11 @@ class TestRestrictLot(TransactionCase):
         )
 
         # create goods in stock
+<<<<<<< HEAD
         lot2 = self.env["stock.lot"].create(
+=======
+        lot2 = self.env["stock.production.lot"].create(
+>>>>>>> [FIX] stock_restrict_lot: do not merge stock move with different restrict_lot_id
             {
                 "name": "lot 2",
                 "product_id": self.product.id,
@@ -191,7 +225,11 @@ class TestRestrictLot(TransactionCase):
                 and mov.location_id == expect_from_location
             )
             self.assertEqual(len(concern_move_line), 1)
+<<<<<<< HEAD
             self.assertEqual(concern_move_line.reserved_uom_qty, expect_reserved_qty)
+=======
+            self.assertEqual(concern_move_line.product_uom_qty, expect_reserved_qty)
+>>>>>>> [FIX] stock_restrict_lot: do not merge stock move with different restrict_lot_id
 
         pickings = self.env["stock.picking"].search(
             [("group_id", "=", procurement_group.id)]
