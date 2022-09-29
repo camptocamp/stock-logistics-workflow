@@ -1,0 +1,1 @@
+odoo15-addon-stock_lot_product_qty_search@git+https://github.com/OCA/stock-logistics-workflow@refs/pull/1098/head#subdirectory=setup/stock_lot_product_qty_search
