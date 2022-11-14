@@ -12,5 +12,6 @@
     "external_dependencies": {"python": ["pytz"]},
     "data": [
         "views/res_config_settings_views.xml",
+        "data/ir_config_parameter.xml",
     ],
 }
