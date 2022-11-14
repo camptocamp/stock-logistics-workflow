@@ -9,6 +9,26 @@ from .test_res_config_settings_common import ResConfigSettingsCase
 
 
 class DeliverySchedulerLimitCase(ResConfigSettingsCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.location = cls.env.ref("stock.stock_location_stock")
+        cls.location_dest = cls.env.ref("stock.stock_location_customers")
+
+        cls.product_1 = cls.env["product.product"].create(
+            {
+                "name": "Test Product 1",
+                "type": "product",
+            }
+        )
+        cls.env["stock.quant"].with_context(inventory_mode=True).create(
+            {
+                "product_id": cls.product_1.id,
+                "location_id": cls.location.id,
+                "inventory_quantity": 100,
+            }
+        )
+
     def test_settings_applied_to_company(self):
         self.assertEqual(self.company.is_moves_assignation_limited, True)
         self.assertEqual(self.company.moves_assignation_horizon, 2)
@@ -21,29 +41,34 @@ class DeliverySchedulerLimitCase(ResConfigSettingsCase):
         )
 
     def test_delivery_scheduler_horizon_limit(self):
-        self.location = self.env.ref("stock.stock_location_stock")
-        self.location_dest = self.env.ref("stock.stock_location_customers")
-
-        self.product_1 = self.env["product.product"].create(
-            {
-                "name": "Test Product 1",
-                "type": "product",
-            }
-        )
-        self.env["stock.quant"].with_context(inventory_mode=True).create(
-            {
-                "product_id": self.product_1.id,
-                "location_id": self.location.id,
-                "inventory_quantity": 100,
-            }
-        )
-
         picking_1 = self._create_picking(days_horizon=1)
         picking_2 = self._create_picking(days_horizon=3)
         picking_1.action_confirm()
         picking_2.action_confirm()
 
         self.env["procurement.group"].run_scheduler(company_id=self.company.id)
+
+        self.assertEqual(picking_1.state, "assigned")
+        self.assertEqual(picking_2.state, "confirmed")
+
+    def test_delivery_scheduler_global_settings(self):
+
+        picking_1 = self._create_picking(days_horizon=1)
+        picking_2 = self._create_picking(days_horizon=3)
+        picking_1.action_confirm()
+        picking_2.action_confirm()
+
+        self.company.is_moves_assignation_limited = False
+
+        # enable global params
+        self.env["ir.config_parameter"].sudo().set_param(
+            "s_scheduler_assignation_horizon.global_moves_assignation", True
+        )
+        self.env["ir.config_parameter"].sudo().set_param(
+            "s_scheduler_assignation_horizon.stock_scheduler_assignation_horizon", 2
+        )
+
+        self.env["procurement.group"].run_scheduler()
 
         self.assertEqual(picking_1.state, "assigned")
         self.assertEqual(picking_2.state, "confirmed")
