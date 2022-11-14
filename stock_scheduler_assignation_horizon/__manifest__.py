@@ -3,7 +3,7 @@
 {
     "name": "Scheduler assignation horizon",
     "summary": "Set a timeframe limit to the delivery scheduler",
-    "version": "14.0.1.0.0",
+    "version": "14.0.1.0.1",
     "category": "Inventory",
     "author": "Camptocamp, Odoo Community Association (OCA)",
     "license": "AGPL-3",
@@ -12,5 +12,6 @@
     "external_dependencies": {"python": ["pytz"]},
     "data": [
         "views/res_config_settings_views.xml",
+        "data/ir_config_parameter.xml",
     ],
 }
