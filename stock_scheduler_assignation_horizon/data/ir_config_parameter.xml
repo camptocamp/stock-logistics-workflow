@@ -10,7 +10,7 @@
     <record id="param_stock_scheduler_assignation_horizon" model="ir.config_parameter">
         <field
             name="key"
-        >s_scheduler_assignation_horizon.stock_horizon_move_assignation_limit</field>
+        >stock_scheduler_assignation_horizon.stock_horizon_move_assignation_limit</field>
         <field name="value">0</field>
     </record>
 </odoo>
