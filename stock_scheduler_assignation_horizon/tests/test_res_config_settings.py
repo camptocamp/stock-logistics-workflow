@@ -29,13 +29,9 @@ class DeliverySchedulerLimitCase(ResConfigSettingsCase):
             }
         )
 
-    def test_settings_applied_to_company(self):
-        self.assertEqual(self.company.is_moves_assignation_limited, True)
-        self.assertEqual(self.company.moves_assignation_horizon, 2)
-
     def test_assignation_horizon_negative_value(self):
         with self.assertRaises(ValidationError) as context:
-            self.settings.moves_assignation_horizon = -3
+            self.settings.stock_horizon_move_assignation_limit = -3
         self.assertEqual(
             "The assignation horizon cannot be negative", str(context.exception)
         )
@@ -45,28 +41,6 @@ class DeliverySchedulerLimitCase(ResConfigSettingsCase):
         picking_2 = self._create_picking(days_horizon=3)
         picking_1.action_confirm()
         picking_2.action_confirm()
-
-        self.env["procurement.group"].run_scheduler(company_id=self.company.id)
-
-        self.assertEqual(picking_1.state, "assigned")
-        self.assertEqual(picking_2.state, "confirmed")
-
-    def test_delivery_scheduler_global_settings(self):
-
-        picking_1 = self._create_picking(days_horizon=1)
-        picking_2 = self._create_picking(days_horizon=3)
-        picking_1.action_confirm()
-        picking_2.action_confirm()
-
-        self.company.is_moves_assignation_limited = False
-
-        # enable global params
-        self.env["ir.config_parameter"].sudo().set_param(
-            "s_scheduler_assignation_horizon.stock_horizon_move_assignation", True
-        )
-        self.env["ir.config_parameter"].sudo().set_param(
-            "s_scheduler_assignation_horizon.stock_horizon_move_assignation_limit", 2
-        )
 
         self.env["procurement.group"].run_scheduler()
 
