@@ -4,7 +4,7 @@
     <record id="global_is_moves_assignation_limited" model="ir.config_parameter">
         <field
             name="key"
-        >s_scheduler_assignation_horizon.stock_horizon_move_assignation</field>
+        >stock_scheduler_assignation_horizon.stock_horizon_move_assignation</field>
         <field name="value">False</field>
     </record>
     <record id="param_stock_scheduler_assignation_horizon" model="ir.config_parameter">
