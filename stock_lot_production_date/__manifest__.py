@@ -9,7 +9,6 @@
     "category": "Warehouse Management",
     "depends": ["stock"],
     "data": [
-        "views/product_template.xml",
         "views/stock_lot.xml",
     ],
     "installable": True,

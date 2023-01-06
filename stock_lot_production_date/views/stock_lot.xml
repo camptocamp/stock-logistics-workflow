@@ -8,12 +8,8 @@
     <field name="model">stock.production.lot</field>
     <field name="inherit_id" ref="stock.view_production_lot_form" />
     <field name="arch" type="xml">
-      <field name="locked" position="after">
-        <field name="use_production_date" invisible="1" />
-        <field
-                    name="production_date"
-                    attrs="{'invisible': [('use_production_date', '=', False)]}"
-                />
+      <field name="ref" position="after">
+        <field name="production_date" />
       </field>
     </field>
   </record>
