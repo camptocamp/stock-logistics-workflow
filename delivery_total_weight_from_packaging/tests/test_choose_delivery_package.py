@@ -6,12 +6,12 @@ from .common import TestShippingWeightCommon
 
 
 class TestDeliveryPackageWeight(TestShippingWeightCommon):
-    def _get_wiz(self, picking, packaging=None):
+    def _get_wiz(self, picking, package=None):
         # `default_picking_id` is required for default weight compute
         wiz = (
             self.env["choose.delivery.package"]
             .with_context(default_picking_id=picking.id)
-            .create({"delivery_packaging_id": packaging.id if packaging else None})
+            .create({"delivery_package_type_id": package.id if package else None})
         )
         return wiz
 
@@ -27,7 +27,7 @@ class TestDeliveryPackageWeight(TestShippingWeightCommon):
         picking = self.move.picking_id
         picking.action_assign()
         for line in picking.move_line_ids:
-            line.qty_done = line.product_qty
+            line.qty_done = line.reserved_uom_qty
 
         wiz = self._get_wiz(picking)
         self.assertEqual(wiz.shipping_weight, 18)
@@ -44,7 +44,7 @@ class TestDeliveryPackageWeight(TestShippingWeightCommon):
         picking = self.move.picking_id
         picking.action_assign()
         for line in picking.move_line_ids:
-            line.qty_done = line.product_qty
+            line.qty_done = line.reserved_uom_qty
 
         wiz = self._get_wiz(picking)
         self.assertEqual(wiz.shipping_weight, 21)
