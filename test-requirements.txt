@@ -1,1 +1,2 @@
 odoo-test-helper
+odoo-addon-product_total_weight_from_packaging @ git+https://github.com/OCA/product-attribute.git@refs/pull/1404/head#subdirectory=setup/product_total_weight_from_packaging
