@@ -10,12 +10,17 @@ class StockPicking(models.Model):
 
     note = fields.Html(compute="_compute_note", store=True)
 
+    # TODO: ideally, we should add more detailed dependencies here;
+    # however, there's a CacheMiss error that occurs when adding
+    # "picking_type_id.partner_note_type_ids" and "partner_id.stock_picking_note_ids"
+    # so we're leaving it like this for now
+    # (the partner should be enough to trigger the compute).
     @api.depends("partner_id")
     def _compute_note(self):
         for picking in self:
             picking_type_note_type_ids = picking.picking_type_id.partner_note_type_ids
             picking_notes = picking.partner_id.stock_picking_note_ids.filtered(
-                lambda n: n.note_type_id in picking_type_note_type_ids
+                lambda n: n.active and n.note_type_id in picking_type_note_type_ids
             )
             picking_notes = [
                 note.name.strip()
