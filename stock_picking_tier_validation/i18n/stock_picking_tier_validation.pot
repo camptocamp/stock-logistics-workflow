@@ -91,6 +91,11 @@ msgid "Tier Definition"
 msgstr ""
 
 #. module: stock_picking_tier_validation
+#: model:ir.model.fields,field_description:stock_picking_tier_validation.field_stock_picking__tier_validation_before_write
+msgid "Tier Validation Before Write"
+msgstr ""
+
+#. module: stock_picking_tier_validation
 #: model:ir.model.fields,field_description:stock_picking_tier_validation.field_stock_picking__to_validate_message
 msgid "To Validate Message"
 msgstr ""
@@ -119,6 +124,11 @@ msgstr ""
 #. module: stock_picking_tier_validation
 #: model:ir.model.fields,field_description:stock_picking_tier_validation.field_stock_picking__validated_message
 msgid "Validated Message"
+msgstr ""
+
+#. module: stock_picking_tier_validation
+#: model:ir.model.fields,field_description:stock_picking_tier_validation.field_stock_picking__validation_status
+msgid "Validation Status"
 msgstr ""
 
 #. module: stock_picking_tier_validation
