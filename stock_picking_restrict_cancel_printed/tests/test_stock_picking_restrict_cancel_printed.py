@@ -32,3 +32,13 @@ class TestResPartnerGetAddress(TransactionCase):
         self.picking_type.restrict_cancel_if_printed = False
         self.picking.printed = True
         self.picking.action_cancel()
+
+    def test_stock_move_restrict_cancel_printed_enabled(self):
+        self.picking.printed = True
+        with self.assertRaises(UserError):
+            self.picking.move_ids.action_cancel()
+
+    def test_stock_move_restrict_cancel_printed_disabled(self):
+        self.picking_type.restrict_cancel_if_printed = False
+        self.picking.printed = True
+        self.picking.move_ids.action_cancel()
