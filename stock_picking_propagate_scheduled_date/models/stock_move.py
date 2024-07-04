@@ -24,10 +24,14 @@ class StockMove(models.Model):
                     continue
                 if move_dest.id in already_propagated_ids:
                     continue
-                move_dest.date -= delta
+                move_dest.with_context(skip_date_propagation=True).write(
+                    {
+                        "date": move_dest.date - delta,
+                    }
+                )
 
     def write(self, vals):
         # propagate date changes in the stock move chain
-        if "date" in vals:
+        if "date" in vals and not self.env.context.get("skip_date_propagation", False):
             self._propagate_date(vals.get("date"))
         return super().write(vals)
