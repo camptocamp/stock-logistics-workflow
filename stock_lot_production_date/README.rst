@@ -67,6 +67,7 @@ Contributors
 ------------
 
 -  Sébastien Alix <sebastien.alix@camptocamp.com>
+-  Frederic Grall <fgr@apik.cloud>
 
 Other credits
 -------------
