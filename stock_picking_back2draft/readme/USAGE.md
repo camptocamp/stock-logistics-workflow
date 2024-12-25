@@ -1,1 +1,1 @@
-Just open a cancelled picking and click on 'back to draft' button
+Just open a cancelled pickings and click on the 'back to draft' button
