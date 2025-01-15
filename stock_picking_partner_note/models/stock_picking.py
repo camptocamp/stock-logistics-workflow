@@ -1,8 +1,8 @@
 # Copyright 2024 Camptocamp (<https://www.camptocamp.com>).
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
-
 from odoo import api, fields, models
+from odoo.tools import html_escape
 
 
 class StockPicking(models.Model):
@@ -19,7 +19,7 @@ class StockPicking(models.Model):
                 and n.note_type_id in ptnts
             )
             picking_notes = [
-                note.name.strip()
+                html_escape(note.name.strip())
                 for note in picking_notes
                 if note.name and note.name.strip()
             ]
