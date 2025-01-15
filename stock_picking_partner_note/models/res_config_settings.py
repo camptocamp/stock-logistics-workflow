@@ -10,6 +10,6 @@ class ResConfigSettings(models.TransientModel):
     check_note_already_in_use = fields.Boolean(
         related="company_id.check_note_already_in_use",
         readonly=False,
-        help="That must be activated if you want to prevent the update or deletion "
-        "of a note that is already in use by multiple contacts.",
+        help="Prevent the update or deletion of a note that is already in use by "
+        "more than one contact.",
     )

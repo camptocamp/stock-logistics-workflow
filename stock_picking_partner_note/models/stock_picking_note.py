@@ -31,7 +31,7 @@ class StockPickingNote(models.Model):
             if len(partners) > 1:
                 raise UserError(
                     _(
-                        "You cannot update or delete a note that linked to multiple"
+                        "You cannot update or delete a note that is linked to multiple"
                         " contacts: %(partner_ids)s",
                         partner_ids=", ".join(partners.mapped("name")),
                     )
