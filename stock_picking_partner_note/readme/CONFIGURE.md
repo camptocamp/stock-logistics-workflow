@@ -3,7 +3,7 @@
   types will be shown in picking operations notes.
 - On contacts add picking notes.
 
-You can prevent users ot update or delete notes alredy in use by
+You can prevent users from updating or deleting notes already in use by
 multiple customers by activating setting Prevent update or delete of
 notes in use by multiple customers in Inventory \> Configuration \>
 Settings.
