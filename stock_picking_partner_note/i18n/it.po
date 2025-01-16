@@ -33,6 +33,7 @@ msgstr ""
 #. module: stock_picking_partner_note
 #: model:ir.model.fields,field_description:stock_picking_partner_note.field_res_company__check_note_already_in_use
 #: model:ir.model.fields,field_description:stock_picking_partner_note.field_res_config_settings__check_note_already_in_use
+#: model_terms:ir.ui.view,arch_db:stock_picking_partner_note.res_config_settings_view_form
 msgid "Check picking note already in use"
 msgstr "Contollo nota prelievo già in uso"
 
@@ -74,12 +75,6 @@ msgstr "Nome visualizzato"
 #: model:ir.model.fields,field_description:stock_picking_partner_note.field_stock_picking_note_type__id
 msgid "ID"
 msgstr "ID"
-
-#. module: stock_picking_partner_note
-#: model:ir.model.fields,field_description:stock_picking_partner_note.field_stock_picking_note____last_update
-#: model:ir.model.fields,field_description:stock_picking_partner_note.field_stock_picking_note_type____last_update
-msgid "Last Modified on"
-msgstr "Ultima modifica il"
 
 #. module: stock_picking_partner_note
 #: model:ir.model.fields,field_description:stock_picking_partner_note.field_stock_picking_note__write_uid
@@ -145,6 +140,13 @@ msgid "Picking Type"
 msgstr "Tipo prelievo"
 
 #. module: stock_picking_partner_note
+#: model:ir.model.fields,help:stock_picking_partner_note.field_res_config_settings__check_note_already_in_use
+msgid ""
+"Prevent the update or deletion of a note that is already in use by more than "
+"one contact."
+msgstr ""
+
+#. module: stock_picking_partner_note
 #: model:ir.model.fields,field_description:stock_picking_partner_note.field_stock_picking_note__sequence
 #: model:ir.model.fields,field_description:stock_picking_partner_note.field_stock_picking_note_type__sequence
 msgid "Sequence"
@@ -154,15 +156,6 @@ msgstr "Sequenza"
 #: model:ir.actions.act_window,name:stock_picking_partner_note.stock_picking_note_types_act_window
 msgid "Stock Picking Note Types"
 msgstr "Tipi nota prelievo magazzino"
-
-#. module: stock_picking_partner_note
-#: model:ir.model.fields,help:stock_picking_partner_note.field_res_config_settings__check_note_already_in_use
-msgid ""
-"That must be activated if you want to prevent the update or deletion of a "
-"note that is already in use by multiple contacts."
-msgstr ""
-"Questo deve essere attivato se si vuole prevenire la modifica o la "
-"cancellazione di una nota che è già in uso da più contatti."
 
 #. module: stock_picking_partner_note
 #: model:ir.model,name:stock_picking_partner_note.model_stock_picking
@@ -183,8 +176,24 @@ msgstr ""
 #: code:addons/stock_picking_partner_note/models/stock_picking_note.py:0
 #, python-format
 msgid ""
-"You cannot update or delete a note that linked to multiple contacts: "
+"You cannot update or delete a note that is linked to multiple contacts: "
 "%(partner_ids)s"
 msgstr ""
-"Non si può modificare o cancellare una nota che è collegata a più contatti: "
-"%(partner_ids)s"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Ultima modifica il"
+
+#~ msgid ""
+#~ "That must be activated if you want to prevent the update or deletion of a "
+#~ "note that is already in use by multiple contacts."
+#~ msgstr ""
+#~ "Questo deve essere attivato se si vuole prevenire la modifica o la "
+#~ "cancellazione di una nota che è già in uso da più contatti."
+
+#, python-format
+#~ msgid ""
+#~ "You cannot update or delete a note that linked to multiple contacts: "
+#~ "%(partner_ids)s"
+#~ msgstr ""
+#~ "Non si può modificare o cancellare una nota che è collegata a più "
+#~ "contatti: %(partner_ids)s"
