@@ -17,16 +17,18 @@ class StockSplitPicking(models.TransientModel):
 
     def _apply_kit_quantity(self):
         pickings = self.env["stock.picking"]
-        for picking in self.mapped("picking_ids"):
+        for picking in self.picking_ids:
             pickings |= self._split_by_kit_quantity(picking)
         return self._picking_action(pickings)
 
     def _split_by_kit_quantity(self, picking):
         filters = {
-            "incoming_moves": lambda m: m.location_id.usage == "supplier",
-            "outgoing_moves": lambda m: m.location_id.usage != "supplier",
+            "incoming_moves": lambda m: True,
+            "outgoing_moves": lambda m: False,
         }
-        move_lines = picking.move_lines
+        move_lines = picking.move_lines.filtered(
+            lambda m: m.state not in ["done", "cancel"]
+        )
         if self.split_kit_order_move:
             move_lines = move_lines.sorted(self.split_kit_order_move)
         moves_to_backorder = self.env["stock.move"]
@@ -48,7 +50,7 @@ class StockSplitPicking(models.TransientModel):
                 # Non kit moves, their quantity is the number of slots used
                 for move in moves:
                     quantity = move.product_qty
-                    if available_slots >= move.product_qty:
+                    if available_slots >= quantity:
                         used_slots += quantity
                         available_slots = max_slots - used_slots
                     elif available_slots <= 0:
@@ -67,7 +69,6 @@ class StockSplitPicking(models.TransientModel):
                     bom,
                     filters,
                 )
-                kit_quantity = abs(kit_quantity)
                 if kit_quantity <= available_slots:
                     used_slots += kit_quantity
                 else:
@@ -82,8 +83,6 @@ class StockSplitPicking(models.TransientModel):
         if moves_to_backorder:
             new_picking = picking._create_split_backorder()
             moves_to_backorder.write({"picking_id": new_picking.id})
-            moves_to_backorder.mapped("move_line_ids").write(
-                {"picking_id": new_picking.id}
-            )
+            moves_to_backorder.move_line_ids.write({"picking_id": new_picking.id})
 
         return new_picking

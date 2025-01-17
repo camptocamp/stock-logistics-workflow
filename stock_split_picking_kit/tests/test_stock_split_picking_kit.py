@@ -18,24 +18,6 @@ class TestStockSplitPickingKit(SavepointCase):
         cls.partner = cls.env["res.partner"].create({"name": "Test partner"})
         cls.product_model = cls.env["product.product"]
 
-        # TODO: How should we handle kit with multiple level
-        # cls.product_garden_furniture = cls.product_model.create(
-        #     {
-        #         "name": "GARDEN FURNITURE",
-        #         "type": "product",
-        #         "sale_ok": False,
-        #         "purchase_ok": True,
-        #     }
-        # )
-        # cls.tmpl_garden_furniture = cls.product_garden_furniture.product_tmpl_id
-        # cls.product_garden_chair = cls.product_model.create(
-        #     {
-        #         "name": "GARDEN CHAIR",
-        #         "type": "product",
-        #         "sale_ok": True,
-        #         "purchase_ok": True,
-        #     }
-        # )
         cls.product_garden_table = cls.product_model.create(
             {
                 "name": "GARDEN TABLE",
@@ -86,25 +68,6 @@ class TestStockSplitPickingKit(SavepointCase):
                 ],
             }
         )
-        # cls.bom_garden_furniture = cls.bom_model.create(
-        #     {
-        #         "product_tmpl_id": cls.tmpl_garden_furniture.id,
-        #         "product_id": cls.product_garden_furniture.id,
-        #         "type": "phantom",
-        #         "bom_line_ids": [
-        #             (
-        #                 0,
-        #                 0,
-        #                 {"product_id": cls.product_garden_chair.id, "product_qty": 4.0},
-        #             ),
-        #             (
-        #                 0,
-        #                 0,
-        #                 {"product_id": cls.product_garden_table.id, "product_qty": 1.0},
-        #             ),
-        #         ],
-        #     }
-        # )
 
     @classmethod
     def _create_picking(cls, lines):
@@ -129,13 +92,13 @@ class TestStockSplitPickingKit(SavepointCase):
     def _get_kit_quantity(cls, picking, bom):
         """Returns the quantity of kits in a transfer."""
         filters = {
-            "incoming_moves": lambda m: m.location_id.usage == "supplier",
-            "outgoing_moves": lambda m: m.location_id.usage != "supplier",
+            "incoming_moves": lambda m: True,
+            "outgoing_moves": lambda m: False,
         }
         kit_quantity = picking.move_lines._compute_kit_quantities(
-            bom.product_id, 100, bom, filters
+            bom.product_id, max(picking.move_lines.mapped("product_qty")), bom, filters
         )
-        return abs(kit_quantity)
+        return kit_quantity
 
     def _check_move_lines(self, picking, move_lines):
         moves = []
