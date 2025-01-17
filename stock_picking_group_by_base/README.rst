@@ -85,6 +85,7 @@ Contributors
 ------------
 
 - Denis Roussel <denis.roussel@acsone.eu>
+- Tuan Nguyen <tuanna@trobz.com>
 
 Maintainers
 -----------

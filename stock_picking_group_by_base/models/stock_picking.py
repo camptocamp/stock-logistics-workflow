@@ -5,9 +5,9 @@
 import logging
 
 from psycopg2.errors import LockNotAvailable
-from psycopg2.extensions import AsIs
 
 from odoo import api, models
+from odoo.tools import SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -32,7 +32,10 @@ class StockPicking(models.Model):
     def _get_index_for_grouping_condition(self):
         return """
             WHERE printed is False
-            AND state in ('draft', 'confirmed', 'waiting', 'partially_available', 'assigned')
+            AND state in (
+                'draft', 'confirmed', 'waiting',
+                'partially_available', 'assigned'
+            )
         """
 
     @api.model
@@ -43,30 +46,38 @@ class StockPicking(models.Model):
 
         try:
             self.env.cr.execute(
-                "DROP INDEX IF EXISTS %(index_name)s", dict(index_name=AsIs(index_name))
+                SQL(
+                    "DROP INDEX IF EXISTS %(index_name)s",
+                    index_name=SQL.identifier(index_name),
+                )
             )
 
             self.env.cr.execute(
-                """
+                SQL(
+                    """
                     CREATE INDEX %(index_name)s
-                    ON %(table_name)s %(fields)s
+                    ON %(table_name)s (%(fields)s)
                     %(where)s
                 """,
-                dict(
-                    index_name=AsIs(index_name),
-                    table_name=AsIs(self._table),
-                    fields=tuple(
-                        [AsIs(field) for field in self._get_index_for_grouping_fields()]
+                    index_name=SQL.identifier(index_name),
+                    table_name=SQL.identifier(self._table),
+                    fields=SQL(", ").join(
+                        [
+                            SQL.identifier(field)
+                            for field in self._get_index_for_grouping_fields()
+                        ]
                     ),
-                    where=AsIs(self._get_index_for_grouping_condition()),
-                ),
+                    where=SQL(self._get_index_for_grouping_condition()),
+                )
             )
         except LockNotAvailable as e:
             # Do nothing and let module load
             _logger.warning(
-                "Impossible to create index in stock_picking_group_by_base module"
-                " due to DB Lock problem (%s)",
-                e,
+                self.env._(
+                    "Impossible to create index in stock_picking_group_by_base module"
+                    " due to DB Lock problem (%s)",
+                    e,
+                )
             )
         except Exception:
             raise
