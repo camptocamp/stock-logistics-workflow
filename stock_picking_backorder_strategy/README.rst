@@ -17,26 +17,26 @@ Picking backordering strategies
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fstock--logistics--workflow-lightgray.png?logo=github
-    :target: https://github.com/OCA/stock-logistics-workflow/tree/15.0/stock_picking_backorder_strategy
+    :target: https://github.com/OCA/stock-logistics-workflow/tree/18.0/stock_picking_backorder_strategy
     :alt: OCA/stock-logistics-workflow
 .. |badge4| image:: https://img.shields.io/badge/weblate-Translate%20me-F47D42.png
-    :target: https://translation.odoo-community.org/projects/stock-logistics-workflow-15-0/stock-logistics-workflow-15-0-stock_picking_backorder_strategy
+    :target: https://translation.odoo-community.org/projects/stock-logistics-workflow-18-0/stock-logistics-workflow-18-0-stock_picking_backorder_strategy
     :alt: Translate me on Weblate
 .. |badge5| image:: https://img.shields.io/badge/runboat-Try%20me-875A7B.png
-    :target: https://runboat.odoo-community.org/builds?repo=OCA/stock-logistics-workflow&target_branch=15.0
+    :target: https://runboat.odoo-community.org/builds?repo=OCA/stock-logistics-workflow&target_branch=18.0
     :alt: Try me on Runboat
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-In types of operation add a backorder strategy to be able to cancel created
-backorder or to avoid to create a backorder.
+In types of operation add a backorder strategy to be able to cancel
+created backorder or to avoid to create a backorder.
 
 Possible strategies are:
 
-* Manual (Default): Let the backorder wizard to be launched as usual
-* Create: Backorder is created if it exists some remaining quantities
-* No Create: no backorder are created
-* Cancel: backorder is cancelled
+-  Manual (Default): Let the backorder wizard to be launched as usual
+-  Create: Backorder is created if it exists some remaining quantities
+-  No Create: no backorder are created
+-  Cancel: backorder is cancelled
 
 **Table of contents**
 
@@ -46,47 +46,46 @@ Possible strategies are:
 Installation
 ============
 
-Your preferred way to install addons will work with Stock Picking Backorder Strategy.
+Your preferred way to install addons will work with Stock Picking
+Backorder Strategy.
 
 An easy way to install it with all its dependencies is using pip:
 
-pip install --pre odoo11-addon-stock-picking-backorder-strategy
-then restart Odoo, update the addons list in your database, and install the Stock Picking Backorder Strategy application.
+pip install --pre odoo11-addon-stock-picking-backorder-strategy then
+restart Odoo, update the addons list in your database, and install the
+Stock Picking Backorder Strategy application.
 
 Usage
 =====
 
 To configure this module, you need to:
 
-* Define backorder strategy on picking type (Warehouse > Configuration > Types of Operation)
+-  Define backorder strategy on picking type (Warehouse > Configuration
+   > Types of Operation)
 
 Changelog
 =========
 
 11.0.1.0.0 (2018-12-06)
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
-* [11.0][MIG] stock_picking_backorder_strategy
-  Migration to v11.0
-  Field pack_operation_ids removed in v11
-  Method do_new_transfer changed to button_validate
+-  [11.0][MIG] stock_picking_backorder_strategy Migration to v11.0 Field
+   pack_operation_ids removed in v11 Method do_new_transfer changed to
+   button_validate
 
 10.0.1.0.0 (2018-06-06)
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
-* [10.0][MIG] stock_picking_backorder_strategy
-  Migration to v10.0
-  Added a default 'manual' strategy according to changed flow in pickings.
-  Let the normal process (backorder wizard) occurs
+-  [10.0][MIG] stock_picking_backorder_strategy Migration to v10.0 Added
+   a default 'manual' strategy according to changed flow in pickings.
+   Let the normal process (backorder wizard) occurs
 
 8.0.1.0.0 (2015-08-13)
-~~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
-* [ADD] add module stock_backorder_strategy
-  Define on stock_picking_type how to manage backorder.
-  create: default behavior
-  no_create: no backorder created
-  cancel: backorder is cancelled
+-  [ADD] add module stock_backorder_strategy Define on
+   stock_picking_type how to manage backorder. create: default behavior
+   no_create: no backorder created cancel: backorder is cancelled
 
 Bug Tracker
 ===========
@@ -94,7 +93,7 @@ Bug Tracker
 Bugs are tracked on `GitHub Issues <https://github.com/OCA/stock-logistics-workflow/issues>`_.
 In case of trouble, please check there if your issue has already been reported.
 If you spotted it first, help us to smash it by providing a detailed and welcomed
-`feedback <https://github.com/OCA/stock-logistics-workflow/issues/new?body=module:%20stock_picking_backorder_strategy%0Aversion:%2015.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
+`feedback <https://github.com/OCA/stock-logistics-workflow/issues/new?body=module:%20stock_picking_backorder_strategy%0Aversion:%2018.0%0A%0A**Steps%20to%20reproduce**%0A-%20...%0A%0A**Current%20behavior**%0A%0A**Expected%20behavior**>`_.
 
 Do not contact contributors directly about support or help with technical issues.
 
@@ -102,21 +101,21 @@ Credits
 =======
 
 Authors
-~~~~~~~
+-------
 
 * ACSONE SA/NV
 
 Contributors
-~~~~~~~~~~~~
+------------
 
-* Laetitia Gangloff <laetitia.gangloff@acsone.eu>
-* Denis Roussel <denis.roussel@acsone.eu>
-* Mayank Gosai <mgosai@opensourceintegrators.com>
-* Luis Escobar <lescobar@vauxoo.com>
-* Rujia Liu <rujial@roof.co.nz>
+-  Laetitia Gangloff <laetitia.gangloff@acsone.eu>
+-  Denis Roussel <denis.roussel@acsone.eu>
+-  Mayank Gosai <mgosai@opensourceintegrators.com>
+-  Luis Escobar <lescobar@vauxoo.com>
+-  Rujia Liu <rujial@roof.co.nz>
 
 Maintainers
-~~~~~~~~~~~
+-----------
 
 This module is maintained by the OCA.
 
@@ -139,6 +138,6 @@ Current `maintainers <https://odoo-community.org/page/maintainer-role>`__:
 
 |maintainer-rousseldenis| |maintainer-mgosai| 
 
-This module is part of the `OCA/stock-logistics-workflow <https://github.com/OCA/stock-logistics-workflow/tree/15.0/stock_picking_backorder_strategy>`_ project on GitHub.
+This module is part of the `OCA/stock-logistics-workflow <https://github.com/OCA/stock-logistics-workflow/tree/18.0/stock_picking_backorder_strategy>`_ project on GitHub.
 
 You are welcome to contribute. To learn how please visit https://odoo-community.org/page/Contribute.
