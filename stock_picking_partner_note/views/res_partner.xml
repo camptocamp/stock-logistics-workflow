@@ -15,12 +15,12 @@
                         widget="one2many_list"
                         nolabel="1"
                         colspan="2"
-                        mode="tree"
+                        mode="list"
                     >
-                        <tree>
+                        <list>
                             <field name="name" />
                             <field name="note_type_id" />
-                        </tree>
+                        </list>
                     </field>
                 </group>
             </xpath>
