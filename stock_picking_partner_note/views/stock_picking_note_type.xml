@@ -4,10 +4,10 @@
         <field name="name">stock.picking.note.type.tree</field>
         <field name="model">stock.picking.note.type</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="sequence" widget="handle" readonly="1" />
                 <field name="name" />
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -26,7 +26,7 @@
     <record model="ir.actions.act_window" id="stock_picking_note_types_act_window">
         <field name="name">Stock Picking Note Types</field>
         <field name="res_model">stock.picking.note.type</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[]</field>
         <field name="context">{}</field>
     </record>

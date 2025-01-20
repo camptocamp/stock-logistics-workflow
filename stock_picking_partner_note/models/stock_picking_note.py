@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -14,10 +14,11 @@ class StockPickingNote(models.Model):
     name = fields.Text(required=True)
     active = fields.Boolean(default=True)
     note_type_id = fields.Many2one("stock.picking.note.type", required=True)
-    sequence = sequence = fields.Integer(related="note_type_id.sequence", store=True)
+    sequence = fields.Integer(related="note_type_id.sequence", store=True)
 
     def write(self, vals):
-        self.check_note_already_in_use()
+        if "active" not in vals:
+            self.check_note_already_in_use()
         return super().write(vals)
 
     @api.ondelete(at_uninstall=False)
@@ -30,7 +31,7 @@ class StockPickingNote(models.Model):
             )
             if len(partners) > 1:
                 raise UserError(
-                    _(
+                    self.env._(
                         "You cannot update or delete a note that is linked to multiple"
                         " contacts: %(partner_ids)s",
                         partner_ids=", ".join(partners.mapped("name")),
