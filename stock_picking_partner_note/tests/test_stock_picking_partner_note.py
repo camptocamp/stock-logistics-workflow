@@ -60,9 +60,15 @@ class StockPickingPartnerNote(common.TransactionCase):
                 ],
             }
         )
+        note = partner_b.stock_picking_note_ids[0]
         # We cannot update a note that is already in use
         with self.assertRaises(UserError):
-            partner_b.stock_picking_note_ids.write({"name": "Changed Note"})
+            note.write({"name": "Changed Note"})
+
+        # We can update active field even when note is in use
+        note.write({"active": False})
+        self.assertFalse(note.active, "Note should be archived")
+
         # We cannot delete a note that is already in use
         with self.assertRaises(UserError):
-            partner_b.stock_picking_note_ids.unlink()
+            note.unlink()
