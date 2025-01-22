@@ -49,6 +49,7 @@ class StockSplitPicking(models.TransientModel):
             if bom.type != "phantom":
                 # Non kit moves, their quantity is the number of slots used
                 for move in moves:
+                    is_reserved = bool(move.move_line_ids)
                     quantity = move.product_qty
                     if available_slots >= quantity:
                         used_slots += quantity
@@ -60,6 +61,8 @@ class StockSplitPicking(models.TransientModel):
                         moves_to_backorder |= self.env["stock.move"].create(
                             new_move_vals
                         )
+                        if is_reserved:
+                            move._action_assign()
                         used_slots = max_slots
             else:
                 # Kit moves
@@ -74,15 +77,24 @@ class StockSplitPicking(models.TransientModel):
                 else:
                     kit_to_split = kit_quantity - available_slots
                     new_move_vals = []
+                    is_reserved = bool(moves.move_line_ids)
+                    if is_reserved:
+                        moves._do_unreserve()
                     for move in moves:
                         new_move_vals += move._split(
                             move.bom_line_id.product_qty * kit_to_split
                         )
                     moves_to_backorder |= self.env["stock.move"].create(new_move_vals)
+                    if is_reserved:
+                        moves._action_assign()
                     used_slots = max_slots
         if moves_to_backorder:
             new_picking = picking._create_split_backorder()
             moves_to_backorder.write({"picking_id": new_picking.id})
             moves_to_backorder.move_line_ids.write({"picking_id": new_picking.id})
+            if picking in ("confirmed", "assigned"):
+                new_picking.action_confirm()
+            if picking.state == "assigned":
+                new_picking.action_assign()
 
         return new_picking

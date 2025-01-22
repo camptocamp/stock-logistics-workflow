@@ -5,3 +5,6 @@ A new field on the wizard also allows specifying a sort order for the stock move
 splitting the transfer.
 
 Multi level boms are not supported.
+
+When a move needs to be split, it will be unreserved if needed.
+And reassigned after the split operation.
