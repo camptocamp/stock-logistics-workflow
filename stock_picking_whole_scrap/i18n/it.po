@@ -51,12 +51,6 @@ msgid "ID"
 msgstr "ID"
 
 #. module: stock_picking_whole_scrap
-#: model:ir.model.fields,field_description:stock_picking_whole_scrap.field_wiz_stock_picking_scrap____last_update
-#: model:ir.model.fields,field_description:stock_picking_whole_scrap.field_wiz_stock_picking_scrap_line____last_update
-msgid "Last Modified on"
-msgstr "Ultima modifica il"
-
-#. module: stock_picking_whole_scrap
 #: model:ir.model.fields,field_description:stock_picking_whole_scrap.field_wiz_stock_picking_scrap__write_uid
 #: model:ir.model.fields,field_description:stock_picking_whole_scrap.field_wiz_stock_picking_scrap_line__write_uid
 msgid "Last Updated by"
@@ -114,12 +108,17 @@ msgid "Quantity"
 msgstr "Quantità"
 
 #. module: stock_picking_whole_scrap
+#: model:ir.model.fields,field_description:stock_picking_whole_scrap.field_wiz_stock_picking_scrap_line__should_replenish
+msgid "Replenish Quantities"
+msgstr ""
+
+#. module: stock_picking_whole_scrap
 #: model_terms:ir.ui.view,arch_db:stock_picking_whole_scrap.view_stock_picking_scrap_form
 msgid "Scrap"
 msgstr "Scarto"
 
 #. module: stock_picking_whole_scrap
-#: model_terms:ir.ui.view,arch_db:stock_picking_whole_scrap.view_picking_form
+#: model:ir.actions.server,name:stock_picking_whole_scrap.action_scrap_all
 msgid "Scrap All"
 msgstr "Scarta tutto"
 
@@ -129,9 +128,19 @@ msgid "Scrap Location"
 msgstr "Ubicazione scarto"
 
 #. module: stock_picking_whole_scrap
+#: model:ir.model.fields,field_description:stock_picking_whole_scrap.field_wiz_stock_picking_scrap_line__scrap_reason_tag_ids
+msgid "Scrap Reason"
+msgstr ""
+
+#. module: stock_picking_whole_scrap
 #: model:ir.model,name:stock_picking_whole_scrap.model_stock_picking
 msgid "Transfer"
 msgstr "Trasferimento"
+
+#. module: stock_picking_whole_scrap
+#: model:ir.model.fields,help:stock_picking_whole_scrap.field_wiz_stock_picking_scrap_line__should_replenish
+msgid "Trigger replenishment for scrapped products"
+msgstr ""
 
 #. module: stock_picking_whole_scrap
 #: model:ir.model.fields,field_description:stock_picking_whole_scrap.field_wiz_stock_picking_scrap_line__uom_id
@@ -139,8 +148,8 @@ msgid "Unit of Measure"
 msgstr "Unità di misura"
 
 #. module: stock_picking_whole_scrap
+#. odoo-python
 #: code:addons/stock_picking_whole_scrap/models/stock_picking.py:0
-#, python-format
 msgid "Whole Scrap"
 msgstr "Scarto complessivo"
 
@@ -155,19 +164,22 @@ msgid "Wizard lines for picking whole scrap"
 msgstr "Righe procedura guidata per prelievo scarto complessivo"
 
 #. module: stock_picking_whole_scrap
+#. odoo-python
 #: code:addons/stock_picking_whole_scrap/wizards/stock_picking_whole_scrap.py:0
-#, python-format
 msgid "You can't scrap more quantity that done it"
 msgstr "Non si può scartare più quantità di quanta prodotta"
 
 #. module: stock_picking_whole_scrap
+#. odoo-python
 #: code:addons/stock_picking_whole_scrap/wizards/stock_picking_whole_scrap.py:0
-#, python-format
 msgid "You may only scrap one picking at a time!"
 msgstr "Si può scartare solo un prelievo alla volta!"
 
 #. module: stock_picking_whole_scrap
+#. odoo-python
 #: code:addons/stock_picking_whole_scrap/wizards/stock_picking_whole_scrap.py:0
-#, python-format
 msgid "You may only scrap pickings in done state"
 msgstr "Si possono scartare solo prelievi in stato eseguito"
+
+#~ msgid "Last Modified on"
+#~ msgstr "Ultima modifica il"
