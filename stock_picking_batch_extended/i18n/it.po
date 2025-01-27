@@ -331,7 +331,7 @@ msgid "Warehouse"
 msgstr "Magazzino"
 
 #. module: stock_picking_batch_extended
-#: model:ir.model.fields,field_description:stock_picking_batch_extended.field_product_product__description_warehouse
+#: model:ir.model.fields,field_description:stock_picking_batch_extended.field_product_product__description_picking
 #: model_terms:ir.ui.view,arch_db:stock_picking_batch_extended.product_normal_form_view
 msgid "Warehouse Description"
 msgstr "Descrizione magazzino"

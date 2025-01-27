@@ -4,7 +4,7 @@
 from odoo import fields, models
 
 
-class Product(models.Model):
-    _inherit = "product.product"
-    # TODO: Integrate in existent field
-    description_warehouse = fields.Text("Warehouse Description", translate=True)
+class ProductTemplate(models.Model):
+    _inherit = "product.template"
+
+    description_picking = fields.Text(string="Warehouse Description", translate=True)
