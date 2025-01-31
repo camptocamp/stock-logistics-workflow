@@ -17,6 +17,14 @@ msgstr ""
 "X-Generator: Weblate 4.17\n"
 
 #. module: stock_picking_group_by_base
+#. odoo-python
+#: code:addons/stock_picking_group_by_base/models/stock_picking.py:0
+msgid ""
+"Impossible to create index in stock_picking_group_by_base module due to DB "
+"Lock problem (%s)"
+msgstr ""
+
+#. module: stock_picking_group_by_base
 #: model:ir.model,name:stock_picking_group_by_base.model_stock_picking
 msgid "Transfer"
 msgstr "Trasferimento"
