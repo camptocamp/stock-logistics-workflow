@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2023-11-17 09:33+0000\n"
+"PO-Revision-Date: 2025-01-31 20:06+0000\n"
 "Last-Translator: mymage <stefano.consolaro@mymage.it>\n"
 "Language-Team: none\n"
 "Language: it\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.17\n"
+"X-Generator: Weblate 5.6.2\n"
 
 #. module: stock_picking_group_by_base
 #. odoo-python
@@ -23,6 +23,8 @@ msgid ""
 "Impossible to create index in stock_picking_group_by_base module due to DB "
 "Lock problem (%s)"
 msgstr ""
+"Impossibile creare un indice nel modulo stock_picking_group_by_base per un "
+"problema di blocco del DB ($s)"
 
 #. module: stock_picking_group_by_base
 #: model:ir.model,name:stock_picking_group_by_base.model_stock_picking
