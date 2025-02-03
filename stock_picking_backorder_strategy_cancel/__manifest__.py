@@ -3,7 +3,7 @@
 
 {
     "name": "Picking backordering strategies",
-    "version": "15.0.1.0.0",
+    "version": "18.0.1.0.0",
     "development_status": "Production/Stable",
     "author": """ACSONE SA/NV,
                  Odoo Community Association (OCA)""",
@@ -11,8 +11,8 @@
     "category": "Warehouse Management",
     "website": "https://github.com/OCA/stock-logistics-workflow",
     "depends": ["stock"],
-    "data": ["views/picking_type.xml"],
     "license": "AGPL-3",
     "installable": True,
     "application": False,
+    "pre_init_hook": "pre_init_hook",
 }
