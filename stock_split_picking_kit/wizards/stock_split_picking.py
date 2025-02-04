@@ -1,7 +1,7 @@
 # Copyright 2025 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html)
 
-from odoo import fields, models
+from odoo import api, fields, models
 from odoo.tools import groupby
 
 
@@ -13,7 +13,10 @@ class StockSplitPicking(models.TransientModel):
         ondelete={"kit_quantity": "set default"},
     )
     kit_split_quantity = fields.Integer(string="Number of kits by transfer")
-    split_kit_order_move = fields.Char()
+
+    @api.model
+    def _sort_move_lines(self, move):
+        return move.sequence
 
     def _apply_kit_quantity(self):
         pickings = self.env["stock.picking"]
@@ -29,8 +32,7 @@ class StockSplitPicking(models.TransientModel):
         move_lines = picking.move_lines.filtered(
             lambda m: m.state not in ["done", "cancel"]
         )
-        if self.split_kit_order_move:
-            move_lines = move_lines.sorted(self.split_kit_order_move)
+        move_lines = move_lines.sorted(self._sort_move_lines)
         moves_to_backorder = self.env["stock.move"]
         new_picking = self.env["stock.picking"]
         used_slots = 0
