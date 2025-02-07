@@ -28,7 +28,7 @@ Pickings back to draft
 
 |badge1| |badge2| |badge3| |badge4| |badge5|
 
-This module allows to bring cancelled pickings back to draft
+This module allows to bring canceled transfers back to draft
 
 **Table of contents**
 
@@ -38,7 +38,7 @@ This module allows to bring cancelled pickings back to draft
 Usage
 =====
 
-Just open a cancelled pickings and click on the 'back to draft' button
+Just open a canceled transfer and click on the 'back to draft' button
 
 Bug Tracker
 ===========
