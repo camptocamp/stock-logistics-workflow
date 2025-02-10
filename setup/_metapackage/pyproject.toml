@@ -1,6 +1,6 @@
 [project]
 name = "odoo-addons-oca-stock-logistics-workflow"
-version = "18.0.20250206.0"
+version = "18.0.20250210.0"
 dependencies = [
     "odoo-addon-sale_order_global_stock_route==18.0.*",
     "odoo-addon-stock_account_product_run_fifo_hook==18.0.*",
@@ -16,6 +16,7 @@ dependencies = [
     "odoo-addon-stock_picking_show_backorder==18.0.*",
     "odoo-addon-stock_picking_show_return==18.0.*",
     "odoo-addon-stock_picking_whole_scrap==18.0.*",
+    "odoo-addon-stock_split_picking==18.0.*",
 ]
 classifiers=[
     "Programming Language :: Python",
