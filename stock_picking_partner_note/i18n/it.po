@@ -176,7 +176,6 @@ msgstr ""
 #. module: stock_picking_partner_note
 #. odoo-python
 #: code:addons/stock_picking_partner_note/models/stock_picking_note.py:0
-#, python-format
 msgid ""
 "You cannot update or delete a note that is linked to multiple contacts: "
 "%(partner_ids)s"
