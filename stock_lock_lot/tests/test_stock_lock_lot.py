@@ -2,10 +2,11 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 from odoo import exceptions
-from odoo.tests import common
+
+from odoo.addons.base.tests.common import BaseCommon
 
 
-class TestStockLockLot(common.TransactionCase):
+class TestStockLockLot(BaseCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
