@@ -140,34 +140,34 @@ Contributors
 
 **picking_dispatch**
 
--  Peter Langenberg <peter.langenberg@bubbles-it.be>
--  Rudolf Schnapka <rs@techno-flex.de>
--  Matthieu Dietrich <matthieu.dietrich@camptocamp.com>
--  Romain Deheele <romain.deheele@camptocamp.com>
--  Leonardo Pistone <leonardo.pistone@camptocamp.com>
--  Guewen Baconnier <guewen.baconnier@camptocamp.com>
--  Yannick Vaucher <yannick.vaucher@camptocamp.com>
--  Alexandre Fayolle <alexandre.fayolle@camptocamp.com>
--  Joël Grand-Guillaume <joel.grandguillaume@camptocamp.com>
--  Cyril Gaudin <cyril.gaudin@camptocamp.com>
--  Iryna Vyshnevska <i.vyshnevska@mobilunity.com>
+- Peter Langenberg <peter.langenberg@bubbles-it.be>
+- Rudolf Schnapka <rs@techno-flex.de>
+- Matthieu Dietrich <matthieu.dietrich@camptocamp.com>
+- Romain Deheele <romain.deheele@camptocamp.com>
+- Leonardo Pistone <leonardo.pistone@camptocamp.com>
+- Guewen Baconnier <guewen.baconnier@camptocamp.com>
+- Yannick Vaucher <yannick.vaucher@camptocamp.com>
+- Alexandre Fayolle <alexandre.fayolle@camptocamp.com>
+- Joël Grand-Guillaume <joel.grandguillaume@camptocamp.com>
+- Cyril Gaudin <cyril.gaudin@camptocamp.com>
+- Iryna Vyshnevska <i.vyshnevska@mobilunity.com>
 
 **stock_batch_picking**
 
--  `Camptocamp <https://www.camptocamp.com>`__:
+- `Camptocamp <https://www.camptocamp.com>`__:
 
-   -  Cyril Gaudin
-   -  Maksym Yankin
+  - Cyril Gaudin
+  - Maksym Yankin
 
--  `Tecnativa <https://www.tecnativa.com>`__:
+- `Tecnativa <https://www.tecnativa.com>`__:
 
-   -  Carlos Dauden
-   -  Sergio Teruel
-   -  César A. Sánchez
+  - Carlos Dauden
+  - Sergio Teruel
+  - César A. Sánchez
 
--  `Trobz <https://trobz.com>`__:
+- `Trobz <https://trobz.com>`__:
 
-      -  Son Ho <sonhd@trobz.com>
+     - Son Ho <sonhd@trobz.com>
 
 Other credits
 -------------
