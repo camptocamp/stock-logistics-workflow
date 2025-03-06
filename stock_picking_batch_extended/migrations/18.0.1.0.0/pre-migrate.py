@@ -4,7 +4,7 @@
 
 def migrate(cr, version):
     cr.execute("""
-        UPDATE product_template
+        UPDATE product_product
             SET description_picking =
                 CASE
                     WHEN description_picking IS NOT NULL THEN
