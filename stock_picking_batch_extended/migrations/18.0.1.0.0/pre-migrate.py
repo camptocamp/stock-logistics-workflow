@@ -5,12 +5,10 @@
 def migrate(cr, version):
     cr.execute("""
         UPDATE product_template
-            SET description_picking =
-                CASE
-                    WHEN description_picking IS NOT NULL THEN
-                        description_picking || '\n' || description_warehouse
-                    ELSE
-                        description_warehouse
-                END
-            WHERE description_warehouse IS NOT NULL;
+            SET description_picking = (
+               SELECT description_warehouse
+               FROM product_product
+               WHERE product_template.id = product_product.product_tmpl_id limit 1
+               )
+        ;
     """)
