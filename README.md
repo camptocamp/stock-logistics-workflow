@@ -26,7 +26,7 @@ addon | version | maintainers | summary
 [delivery_total_weight_from_packaging](delivery_total_weight_from_packaging/) | 14.0.1.0.1 |  | Include packaging weight on move, transfer and package.
 [procurement_auto_create_group_carrier](procurement_auto_create_group_carrier/) | 14.0.1.1.1 |  | Procurement Auto Create Group Carrier
 [product_cost_price_avco_sync](product_cost_price_avco_sync/) | 14.0.1.0.1 | [![carlosdauden](https://github.com/carlosdauden.png?size=30px)](https://github.com/carlosdauden) [![sergio-teruel](https://github.com/sergio-teruel.png?size=30px)](https://github.com/sergio-teruel) | Set product cost price from updated moves
-[product_expiry_simple](product_expiry_simple/) | 14.0.1.0.0 | [![alexis-via](https://github.com/alexis-via.png?size=30px)](https://github.com/alexis-via) | Simpler and better alternative to the official product_expiry module
+[product_expiry_simple](product_expiry_simple/) | 14.0.1.1.0 | [![alexis-via](https://github.com/alexis-via.png?size=30px)](https://github.com/alexis-via) | Simpler and better alternative to the official product_expiry module
 [product_supplierinfo_for_customer_picking](product_supplierinfo_for_customer_picking/) | 14.0.1.4.0 | [![aleuffre](https://github.com/aleuffre.png?size=30px)](https://github.com/aleuffre) [![renda-dev](https://github.com/renda-dev.png?size=30px)](https://github.com/renda-dev) [![PicchiSeba](https://github.com/PicchiSeba.png?size=30px)](https://github.com/PicchiSeba) | This module makes the product customer code visible in the stock moves of a picking.
 [product_supplierinfo_picking](product_supplierinfo_picking/) | 14.0.1.0.0 |  | This module makes the product supplier code visible in the stock moves of a picking.
 [purchase_stock_picking_invoice_link](purchase_stock_picking_invoice_link/) | 14.0.1.1.0 |  | Adds link between purchases, pickings and invoices
@@ -55,6 +55,7 @@ addon | version | maintainers | summary
 [stock_move_forced_lot](stock_move_forced_lot/) | 14.0.1.0.0 |  | This module allows you to set a lot_id in a procurement to force the stock move generated to only reserve the selected lot.
 [stock_move_free_reservation_reassign](stock_move_free_reservation_reassign/) | 14.0.1.0.0 |  | Try to reassign a move when its reservation is removed due to the related quant becoming unavailable
 [stock_move_line_auto_fill](stock_move_line_auto_fill/) | 14.0.1.0.0 |  | Stock Move Line auto fill
+[stock_move_planned_consumed_date](stock_move_planned_consumed_date/) | 14.0.0.1.1 |  | Stock Move planned consumed date
 [stock_move_quick_lot](stock_move_quick_lot/) | 14.0.1.0.0 |  | Set lot name and end date directly on picking operations
 [stock_no_negative](stock_no_negative/) | 14.0.1.0.2 |  | Disallow negative stock levels by default
 [stock_owner_restriction](stock_owner_restriction/) | 14.0.1.0.2 |  | Do not reserve quantity with assigned owner
@@ -83,9 +84,9 @@ addon | version | maintainers | summary
 [stock_picking_putinpack_restriction](stock_picking_putinpack_restriction/) | 14.0.1.0.1 |  | Adds a restriction on transfer type to force or disallow the use of destination package.
 [stock_picking_quick](stock_picking_quick/) | 14.0.1.0.5 | [![PierrickBrun](https://github.com/PierrickBrun.png?size=30px)](https://github.com/PierrickBrun) [![bealdav](https://github.com/bealdav.png?size=30px)](https://github.com/bealdav) | Quick Stock Picking
 [stock_picking_reallocation](stock_picking_reallocation/) | 14.0.1.0.0 |  | Allow to reallocate moves from a picking to several pickings.
-[stock_picking_restrict_cancel_printed](stock_picking_restrict_cancel_printed/) | 14.0.1.0.1 |  | Prevent canceling a stock transfer if printed.
+[stock_picking_restrict_cancel_printed](stock_picking_restrict_cancel_printed/) | 14.0.1.1.1 | [![jbaudoux](https://github.com/jbaudoux.png?size=30px)](https://github.com/jbaudoux) | Prevent canceling a stock transfer if printed.
 [stock_picking_restrict_cancel_with_orig_move](stock_picking_restrict_cancel_with_orig_move/) | 14.0.1.0.1 |  | Restrict cancellation of dest moves according to origin.
-[stock_picking_return_lot](stock_picking_return_lot/) | 14.0.1.0.1 |  | Propagate SN/lots from origin picking to return picking.
+[stock_picking_return_lot](stock_picking_return_lot/) | 14.0.1.0.2 |  | Propagate SN/lots from origin picking to return picking.
 [stock_picking_return_show_lot](stock_picking_return_show_lot/) | 14.0.1.0.1 |  | This module allows to show lots in the picking return wizard before " "return picking creation.
 [stock_picking_sale_order_link](stock_picking_sale_order_link/) | 14.0.1.0.1 |  | Link between picking and sale order
 [stock_picking_send_by_mail](stock_picking_send_by_mail/) | 14.0.1.0.0 |  | Send stock picking by email
@@ -102,7 +103,7 @@ addon | version | maintainers | summary
 [stock_quant_package_dimension_total_weight_from_packaging](stock_quant_package_dimension_total_weight_from_packaging/) | 14.0.1.1.0 |  | Estimated weight of a package
 [stock_quant_package_product_packaging](stock_quant_package_product_packaging/) | 14.0.1.1.0 |  | Use product packagings on packages
 [stock_restrict_expiration_date](stock_restrict_expiration_date/) | 14.0.1.3.1 | [![petrus-v](https://github.com/petrus-v.png?size=30px)](https://github.com/petrus-v) | Add concept of restrict lot on stock move based on specific expiration date
-[stock_restrict_lot](stock_restrict_lot/) | 14.0.1.3.0 | [![florian-dacosta](https://github.com/florian-dacosta.png?size=30px)](https://github.com/florian-dacosta) | Base module that add back the concept of restrict lot on stock move
+[stock_restrict_lot](stock_restrict_lot/) | 14.0.1.4.0 | [![florian-dacosta](https://github.com/florian-dacosta.png?size=30px)](https://github.com/florian-dacosta) | Base module that add back the concept of restrict lot on stock move
 [stock_restrict_lot_update](stock_restrict_lot_update/) | 14.0.1.0.0 | [![aleuffre](https://github.com/aleuffre.png?size=30px)](https://github.com/aleuffre) [![renda-dev](https://github.com/renda-dev.png?size=30px)](https://github.com/renda-dev) | Only apply lot restriction on products in a domain
 [stock_return_request](stock_return_request/) | 14.0.1.0.3 |  | Stock Return Request
 [stock_scheduler_assignation_horizon](stock_scheduler_assignation_horizon/) | 14.0.1.1.0 |  | Set a timeframe limit to the delivery scheduler
