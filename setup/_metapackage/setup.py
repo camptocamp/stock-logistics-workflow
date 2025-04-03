@@ -42,6 +42,7 @@ setuptools.setup(
         'odoo14-addon-stock_move_forced_lot',
         'odoo14-addon-stock_move_free_reservation_reassign',
         'odoo14-addon-stock_move_line_auto_fill',
+        'odoo14-addon-stock_move_planned_consumed_date',
         'odoo14-addon-stock_move_quick_lot',
         'odoo14-addon-stock_no_negative',
         'odoo14-addon-stock_owner_restriction',
