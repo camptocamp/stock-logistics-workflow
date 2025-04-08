@@ -10,7 +10,7 @@ class StockPicking(models.Model):
 
     note = fields.Html(compute="_compute_note", store=True)
 
-    @api.depends("partner_id")
+    @api.depends("partner_id", "origin")
     def _compute_note(self):
         for picking in self:
             picking_type_note_type_ids = picking.picking_type_id.partner_note_type_ids
