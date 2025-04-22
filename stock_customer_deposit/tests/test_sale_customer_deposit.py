@@ -28,6 +28,16 @@ class TestSaleCustomerDeposits(TestStockCustomerDepositCommon):
                 cls.productB: 110,
             },
         }
+        cls.result_test_second_deposit = {
+            False: {
+                cls.productA: 100,
+                cls.productB: 80,
+            },
+            cls.partner1: {
+                cls.productA: 200,
+                cls.productB: 220,
+            },
+        }
 
     @users("user_customer_deposit")
     def test_sale_customer_deposit(self):
@@ -98,6 +108,8 @@ class TestSaleCustomerDeposits(TestStockCustomerDepositCommon):
         so.picking_ids.action_assign()
         so.picking_ids.action_set_quantities_to_reservation()
         so.picking_ids.button_validate()
+        # Check valuation layers has been created when creating a deposit
+        self.assertTrue(so.picking_ids.move_ids.stock_valuation_layer_ids)
         for partner, products in self.result_test.items():
             for product, quantity in products.items():
                 self.assertEqual(
@@ -105,6 +117,23 @@ class TestSaleCustomerDeposits(TestStockCustomerDepositCommon):
                         product, self.warehouse.lot_stock_id, owner_id=partner
                     ),
                     quantity,
+                    "First deposit not added correctly",
+                )
+        # Add another order to deposit
+        so_2 = so.copy()
+        so_2.action_confirm()
+        so_2.picking_ids.action_confirm()
+        so_2.picking_ids.action_assign()
+        so_2.picking_ids.action_set_quantities_to_reservation()
+        so_2.picking_ids.button_validate()
+        for partner, products in self.result_test_second_deposit.items():
+            for product, quantity in products.items():
+                self.assertEqual(
+                    self.env["stock.quant"]._get_available_quantity(
+                        product, self.warehouse.lot_stock_id, owner_id=partner
+                    ),
+                    quantity,
+                    "Second deposit not added correctly",
                 )
 
     @users("user_customer_deposit")
