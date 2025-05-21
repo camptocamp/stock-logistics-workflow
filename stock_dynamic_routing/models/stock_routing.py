@@ -256,6 +256,7 @@ class StockRouting(models.Model):
     # time we clear it. We only need a local cache used for the duration of the
     # execution of
     @lru_cache
+    @staticmethod
     def __cached_is_rule_valid_for_move(self, rule, move):
         """To be used only by _routing_rule_for_move(_line)s
 
@@ -277,7 +278,7 @@ class StockRouting(models.Model):
         # location, then we climb up the tree of locations
         for loc in location_tree:
             # find the first valid rule
-            for rule in rules.filtered(lambda r: r.routing_location_id == loc):
+            for rule in rules.filtered(lambda r, loc=loc: r.routing_location_id == loc):
                 if not self.__cached_is_rule_valid_for_move(rule, move):
                     continue
                 return rule

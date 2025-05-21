@@ -1,13 +1,12 @@
 # Copyright 2019 Camptocamp (https://www.camptocamp.com)
 
-from odoo.tests import common
+from odoo.addons.base.tests.common import BaseCommon
 
 
-class TestRoutingPullCommon(common.TransactionCase):
+class TestRoutingPullCommon(BaseCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env = cls.env(context=dict(cls.env.context, tracking_disable=True))
         cls.partner_delta = cls.env.ref("base.res_partner_4")
         cls.wh = cls.env["stock.warehouse"].create(
             {
@@ -46,10 +45,10 @@ class TestRoutingPullCommon(common.TransactionCase):
         )
 
         cls.product1 = cls.env["product.product"].create(
-            {"name": "Product 1", "type": "product"}
+            {"name": "Product 1", "type": "consu", "is_storable": True}
         )
         cls.product2 = cls.env["product.product"].create(
-            {"name": "Product 2", "type": "product"}
+            {"name": "Product 2", "type": "consu", "is_storable": True}
         )
 
         cls.pick_type_routing_op = cls.env["stock.picking.type"].create(
@@ -176,8 +175,7 @@ class TestRoutingPullCommon(common.TransactionCase):
         self.assertEqual(record.location_dest_id, self.customer_loc)
 
     def process_operations(self, move):
-        qty = move.move_line_ids.reserved_uom_qty
-        move.move_line_ids.qty_done = qty
+        move.move_line_ids.picked = True
         move.picking_id._action_done()
 
 
@@ -1031,8 +1029,8 @@ class TestRoutingPull(TestRoutingPullCommon):
         self.assertRecordValues(
             shelf_move.move_line_ids,
             [
-                {"location_id": self.location_shelf_1.id, "reserved_uom_qty": 10},
-                {"location_id": self.location_shelf_2.id, "reserved_uom_qty": 8},
+                {"location_id": self.location_shelf_1.id, "quantity": 10},
+                {"location_id": self.location_shelf_2.id, "quantity": 8},
             ],
         )
 
@@ -1049,7 +1047,7 @@ class TestRoutingPull(TestRoutingPullCommon):
         self.assertRecordValues(
             highbay_move.move_line_ids,
             [
-                {"location_id": self.location_hb_1_1.id, "reserved_uom_qty": 5},
-                {"location_id": self.location_hb_1_2.id, "reserved_uom_qty": 7},
+                {"location_id": self.location_hb_1_1.id, "quantity": 5},
+                {"location_id": self.location_hb_1_2.id, "quantity": 7},
             ],
         )
