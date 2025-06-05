@@ -25,7 +25,7 @@ class StockMove(models.Model):
         ).write({"location_id": location.id})
 
         lines = moves.mapped("move_line_ids").filtered(
-            lambda l: l.location_dest_id != location and l.state != "done"
+            lambda line: line.location_dest_id != location and line.state != "done"
         )
         lines.write({"location_dest_id": location.id})
         lines.package_level_id.write({"location_dest_id": location.id})
