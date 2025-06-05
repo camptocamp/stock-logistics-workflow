@@ -99,7 +99,7 @@ class TestMoveCommonDestSyncLocation(CheckoutSyncCommonCase):
                     ).ids,
                     "dest_picking_id": self.picking_pack.id,
                     "remaining_help": (
-                        f"<ul><li><strong>{self.picking_pack.name}: 3 move(s)</strong></li>\n"
+                        f"<ul><li><strong>{self.picking_pack.name}: 3 move(s)</strong></li>\n"  # noqa: E501
                         f"<li>{self.picking_pack_post.name}: 1 move(s)</li></ul>"
                     ),
                     "done_dest_picking_ids": [],
@@ -136,7 +136,7 @@ class TestMoveCommonDestSyncLocation(CheckoutSyncCommonCase):
                     "dest_picking_id": self.picking_pack_post.id,
                     "remaining_help": (
                         f"<ul><li>{self.picking_pack.name}: 3 move(s)</li>\n"
-                        f"<li><strong>{self.picking_pack_post.name}: 1 move(s)</strong></li></ul>"
+                        f"<li><strong>{self.picking_pack_post.name}: 1 move(s)</strong></li></ul>"  # noqa: E501
                     ),
                     "done_dest_picking_ids": self.picking_pack.ids,
                     # False because it's the last step to sync
@@ -226,7 +226,7 @@ class TestMoveCommonDestSyncLocation(CheckoutSyncCommonCase):
                     "dest_picking_id": self.picking_pack_post.id,
                     "remaining_help": (
                         f"<ul><li>{self.picking_pack.name}: 3 move(s)</li>\n"
-                        f"<li><strong>{self.picking_pack_post.name}: 1 move(s)</strong></li></ul>"
+                        f"<li><strong>{self.picking_pack_post.name}: 1 move(s)</strong></li></ul>"  # noqa: E501
                     ),
                     "done_dest_picking_ids": self.picking_pack.ids,
                     # False because it's the last step to sync
@@ -249,7 +249,7 @@ class TestMoveCommonDestSyncLocation(CheckoutSyncCommonCase):
                     ).ids,
                     "dest_picking_id": self.picking_pack.id,
                     "remaining_help": (
-                        f"<ul><li><strong>{self.picking_pack.name}: 3 move(s)</strong></li>\n"
+                        f"<ul><li><strong>{self.picking_pack.name}: 3 move(s)</strong></li>\n"  # noqa: E501
                         f"<li>{self.picking_pack_post.name}: 1 move(s)</li></ul>"
                     ),
                     "done_dest_picking_ids": [],
