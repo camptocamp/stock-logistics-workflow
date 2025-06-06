@@ -128,9 +128,7 @@ class TestRoutingPullWithSync(CheckoutSyncCommonCase):
                 | self.pick_move3: self.location_pack_post_bay1,
             }
         )
-        self.pick_move1.move_line_ids.write(
-            {"qty_done": self.pick_move1.move_line_ids.product_uom_qty}
-        )
+        self.pick_move1.move_line_ids.picked = True
         self.pick_move1._action_done()
 
         # check source of destination moves:
@@ -171,7 +169,9 @@ class TestRoutingPullWithSync(CheckoutSyncCommonCase):
         # of the Pack moves. Which will trigger the routing.
         wizard.sync()
 
-        self.pick_move1.move_line_ids.write({"qty_done": 1})
+        ml1 = self.pick_move1.move_line_ids
+        ml1.quantity = 1
+        ml1.picked = True
         self.pick_move1._action_done()
 
         pick_move_split = self.pick_move1.move_dest_ids.move_orig_ids - self.pick_move1
