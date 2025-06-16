@@ -4,6 +4,8 @@ from collections import OrderedDict
 
 from odoo import models
 
+MOVE_STATES_IN_PROGRESS = ("confirmed", "waiting", "partially_available", "assigned")
+
 
 class StockMove(models.Model):
     _inherit = "stock.move"
@@ -22,8 +24,7 @@ class StockMove(models.Model):
         # Sync the source of the destination move too, if it's still waiting.
         moves_dest = moves_to_update.move_dest_ids.filtered(
             # FIXME add partially_available?
-            lambda m: (m.state == "waiting" or m.state == "assigned")
-            and m.location_id != location
+            lambda m: m.state in MOVE_STATES_IN_PROGRESS and m.location_id != location
         )
         moves_dest.picking_id.location_id = location
         moves_dest.location_id = location
