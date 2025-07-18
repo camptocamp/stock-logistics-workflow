@@ -14,3 +14,17 @@ class StockMove(models.Model):
             move.weight = move.product_id.get_total_weight_from_packaging(
                 move.product_qty
             )
+
+    def _get_available_quantity(self):
+        self.ensure_one()
+        if self.product_id:
+            return self.quantity
+        return 0
+
+    def _get_estimated_weight(self):
+        self.ensure_one()
+        product = self.product_id
+        if product:
+            quantity = self._get_available_quantity()
+            return product.get_total_weight_from_packaging(quantity)
+        return 0
