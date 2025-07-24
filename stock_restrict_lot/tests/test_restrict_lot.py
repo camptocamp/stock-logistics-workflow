@@ -1,3 +1,4 @@
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests.common import TransactionCase
 
 
@@ -16,6 +17,50 @@ class TestRestrictLot(TransactionCase):
                 "name": "lot1",
                 "product_id": cls.product.id,
                 "company_id": cls.warehouse.company_id.id,
+            }
+        )
+
+    def _create_move_with_lot(self):
+        move = self.env["stock.move"].create(
+            {
+                "product_id": self.product.id,
+                "location_id": self.output_loc.id,
+                "location_dest_id": self.customer_loc.id,
+                "product_uom_qty": 1,
+                "product_uom": self.product.uom_id.id,
+                "name": "test",
+                "procure_method": "make_to_order",
+                "warehouse_id": self.warehouse.id,
+                "route_ids": [(6, 0, self.warehouse.delivery_route_id.ids)],
+                "restrict_lot_id": self.lot.id,
+            }
+        )
+        move._action_confirm()
+        move._action_assign()
+        new_lot = self.env["stock.lot"].create(
+            {
+                "name": "lot2",
+                "product_id": self.product.id,
+                "company_id": self.warehouse.company_id.id,
+            }
+        )
+        return move, new_lot
+
+    def _create_move_dest(self):
+        return self.env["stock.move"].create(
+            {
+                "product_id": self.product.id,
+                "location_id": self.customer_loc.id,
+                "product_uom_qty": 1,
+                "product_uom": self.product.uom_id.id,
+                "picking_type_id": self.warehouse.out_type_id.id,
+                "location_dest_id": self.output_loc.id,
+                "name": "test",
+                "procure_method": "make_to_order",
+                "warehouse_id": self.warehouse.id,
+                "route_ids": [(6, 0, self.warehouse.delivery_route_id.ids)],
+                "state": "waiting",
+                "restrict_lot_id": self.lot.id,
             }
         )
 
@@ -224,3 +269,114 @@ class TestRestrictLot(TransactionCase):
         assert_move_line_per_lot_and_location(
             pick.move_line_ids_without_package, lot2, location_2, 25
         )
+
+    def test_compute_quantites(self):
+        move = self.env["stock.move"].create(
+            {
+                "product_id": self.product.id,
+                "location_id": self.output_loc.id,
+                "location_dest_id": self.customer_loc.id,
+                "product_uom_qty": 1,
+                "product_uom": self.product.uom_id.id,
+                "name": "test",
+                "procure_method": "make_to_order",
+                "warehouse_id": self.warehouse.id,
+                "route_ids": [(6, 0, self.warehouse.delivery_route_id.ids)],
+                "restrict_lot_id": self.lot.id,
+            }
+        )
+        move._action_confirm()
+
+        lot2 = self.lot.copy({"name": "lot2"})
+        move2 = move.copy()
+        move2.restrict_lot_id = lot2.id
+        move2._action_confirm()
+
+        product = move.product_id
+        self.assertEqual(product.outgoing_qty, 2)
+        product.env.invalidate_all()
+        product = product.with_context(lot_id=self.lot.id)
+        self.assertEqual(product.outgoing_qty, 1)
+
+        product.env.invalidate_all()
+        product = product.with_context(lot_id=lot2.id)
+        self.assertEqual(product.outgoing_qty, 1)
+
+    def test_move_validation_inconsistent_lot(self):
+        """
+        Check that an error is raised when performing a move _action_done()
+        if the lot restriction on the move is inconsistent with the
+        lot in the move line
+        """
+        lot2 = self.env["stock.lot"].create(
+            {
+                "name": "lot2",
+                "product_id": self.product.id,
+                "company_id": self.warehouse.company_id.id,
+            }
+        )
+        self._update_product_stock(1, lot2.id)
+
+        move = self.env["stock.move"].create(
+            {
+                "product_id": self.product.id,
+                "location_id": self.warehouse.lot_stock_id.id,
+                "location_dest_id": self.customer_loc.id,
+                "product_uom_qty": 1,
+                "product_uom": self.product.uom_id.id,
+                "name": "test",
+                "warehouse_id": self.warehouse.id,
+                "restrict_lot_id": self.lot.id,
+            }
+        )
+        move_line = self.env["stock.move.line"].create(
+            {
+                "move_id": move.id,
+                "product_id": move.product_id.id,
+                "qty_done": 1,
+                "product_uom_id": move.product_uom.id,
+                "location_id": move.location_id.id,
+                "location_dest_id": move.location_dest_id.id,
+                "lot_id": lot2.id,
+            }
+        )
+        self.assertRaises(UserError, move._action_done)
+        move_line.lot_id = self.lot
+        move._action_done()
+
+    def test_restrict_lot_propagation_dest_moves(self):
+        move, new_lot = self._create_move_with_lot()
+        move_dest = self._create_move_dest()
+        move.move_dest_ids = [(4, move_dest.id)]
+        self.assertEqual(move_dest.restrict_lot_id, self.lot)
+        move.restrict_lot_id = new_lot.id
+        self.assertEqual(move_dest.restrict_lot_id, new_lot)
+
+    def test_restrict_lot_propagation_origin_moves(self):
+        move, new_lot = self._create_move_with_lot()
+        orig_move = move.move_orig_ids
+        self.assertEqual(orig_move.restrict_lot_id, self.lot)
+        move.restrict_lot_id = new_lot.id
+        self.assertEqual(orig_move.restrict_lot_id, new_lot)
+
+    def test_restrict_lot_propagation_origin_and_dest_moves(self):
+        move, new_lot = self._create_move_with_lot()
+        move_dest = self._create_move_dest()
+        move.move_dest_ids = [(4, move_dest.id)]
+        orig_move = move.move_orig_ids
+        self.assertEqual(move_dest.restrict_lot_id, self.lot)
+        self.assertEqual(orig_move.restrict_lot_id, self.lot)
+        move.restrict_lot_id = new_lot.id
+        self.assertEqual(orig_move.restrict_lot_id, new_lot)
+        self.assertEqual(move_dest.restrict_lot_id, new_lot)
+
+    def test_restrict_lot_no_propagation_error(self):
+        move, new_lot = self._create_move_with_lot()
+        orig_move = move.move_orig_ids
+        orig_move._action_assign()
+        orig_move.quantity_done = orig_move.product_uom_qty
+        orig_move._action_done()
+        self.assertEqual(orig_move.state, "done")
+        with self.assertRaises(ValidationError) as m:
+            move.restrict_lot_id = new_lot.id
+        self.assertIn("You can't modify the Lot/Serial number", m.exception.args[0])
