@@ -55,3 +55,18 @@ class StockMove(models.Model):
                 move_line.qty_picked, self.product_uom, round=False
             )
         return quantity
+
+    def _action_done(self, cancel_backorder=False):
+        # Override to ensure 'product_uom_qty' aligns with the picked qty
+        # (especially with partial picked qty) when backorder is cancelled.
+        # Context: Odoo 18 expects to pick all reserved qty when we validate
+        # a move/transfer, which is not what we want anymore with the new
+        # 'qty_picked' field on 'stock.move.line'.
+        # Field 'product_uom_qty' is updated at only one place: when the move is
+        # split, like during the creation of a backorder move.
+        if cancel_backorder:
+            for move in self:
+                if move.state not in ("assigned", "partially_available"):
+                    continue
+                move.product_uom_qty = move.quantity
+        return super()._action_done(cancel_backorder=cancel_backorder)
