@@ -1,4 +1,5 @@
 # Copyright 2020 Camptocamp SA
+# Copyright 2025 Jacques-Etienne Baudoux (BCIM) <je@bcim.be>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
 from odoo import api, fields, models
 from odoo.tools.misc import format_datetime
@@ -41,15 +42,21 @@ class StockPicking(models.Model):
                 )
 
     def _scheduled_date_no_delivery_window_match_msg(self):
-        scheduled_date = self.scheduled_date
-        formatted_scheduled_date = format_datetime(self.env, scheduled_date)
+        delivery_date = self._planned_delivery_date()
+        formatted_delivery_date = format_datetime(self.env, delivery_date)
+        name_delivery_date = (
+            "scheduled date"
+            if delivery_date == self.scheduled_date
+            else "delivery date"
+        )
         partner = self.partner_id
         if partner.delivery_time_preference == "workdays":
             message = self.env._(
-                "The scheduled date is %(date)s %(weekday)s, but the partner is "
+                "The %(date_name)s is %(date)s %(weekday)s, but the partner is "
                 "set to prefer deliveries on working days.",
-                date=formatted_scheduled_date,
-                weekday=scheduled_date.weekday(),
+                date_name=name_delivery_date,
+                date=formatted_delivery_date,
+                weekday=delivery_date.weekday(),
             )
         else:
             delivery_windows_strings = []
@@ -59,9 +66,10 @@ class StockPicking(models.Model):
                         f"  * {w.display_name} ({partner.tz})"
                     )
             message = self.env._(
-                "The scheduled date is %(date)s (%(tz)s), but the partner is "
+                "The %(date_name)s is %(date)s (%(tz)s), but the partner is "
                 "set to prefer deliveries on following time windows:\n%(window)s",
-                date=format_datetime(self.env, self.scheduled_date),
+                date_name=name_delivery_date,
+                date=format_datetime(self.env, delivery_date),
                 tz=self.env.context.get("tz"),
                 window="\n".join(delivery_windows_strings),
             )
