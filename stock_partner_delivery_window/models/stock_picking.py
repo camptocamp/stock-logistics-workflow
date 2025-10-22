@@ -1,6 +1,9 @@
 # Copyright 2020 Camptocamp SA
 # Copyright 2025 Jacques-Etienne Baudoux (BCIM) <je@bcim.be>
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
+
+from datetime import date, datetime
+
 from odoo import api, fields, models
 from odoo.tools.misc import format_datetime
 
@@ -35,6 +38,8 @@ class StockPicking(models.Model):
 
     def _scheduled_date_no_delivery_window_match_msg(self):
         delivery_date = self._planned_delivery_date()
+        if isinstance(delivery_date, date):
+            delivery_date = datetime.combine(delivery_date, datetime.min.time())
         formatted_delivery_date = format_datetime(self.env, delivery_date)
         name_delivery_date = (
             "scheduled date"
