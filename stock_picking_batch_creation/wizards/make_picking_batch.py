@@ -263,7 +263,7 @@ class MakePickingBatch(models.TransientModel):
         )
 
     def _split_first_picking_for_limit(self, picking):
-        last_device = self.stock_device_type_ids[-1]
+        last_device = self.stock_device_type_ids.sorted()[-1]
         if last_device.split_mode == "dimension":
             return (
                 self.env["stock.split.picking"]
@@ -291,7 +291,7 @@ class MakePickingBatch(models.TransientModel):
         ):
             return True
         # Then, check the device limits
-        last_device = self.stock_device_type_ids[-1]
+        last_device = self.stock_device_type_ids.sorted()[-1]
         if last_device.split_mode == "dimension":
             if last_device.max_volume and picking.volume > last_device.max_volume:
                 return True
@@ -363,7 +363,7 @@ class MakePickingBatch(models.TransientModel):
         return remaining_volume
 
     def _compute_device_to_use(self, picking):
-        for device in self.stock_device_type_ids.sorted("sequence"):
+        for device in self.stock_device_type_ids.sorted():
             if picking.filtered_domain(self._get_picking_domain_for_device(device)):
                 return device
         return self.env["stock.device.type"]
