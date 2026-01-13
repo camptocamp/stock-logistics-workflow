@@ -1,3 +1,5 @@
 odoo-addon-partner_tz @ git+https://github.com/OCA/partner-contact.git@refs/pull/2252/head#subdirectory=partner_tz
 odoo-addon-base_time_window @ git+https://github.com/OCA/server-tools.git@refs/pull/3490/head#subdirectory=base_time_window
 odoo-addon-stock_partner_delivery_window @ git+https://github.com/OCA/stock-logistics-workflow.git@refs/pull/2219/head#subdirectory=stock_partner_delivery_window
+odoo-addon-l10n_eu_product_adr @ git+https://github.com/OCA/community-data-files.git@refs/pull/258/head#subdirectory=l10n_eu_product_adr
+odoo-addon-l10n_eu_product_adr_dangerous_goods @ git+https://github.com/OCA/community-data-files.git@refs/pull/259/head#subdirectory=l10n_eu_product_adr_dangerous_goods
