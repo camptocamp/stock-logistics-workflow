@@ -1,0 +1,64 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* stock_move_line_lock_qty_done
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: stock_move_line_lock_qty_done
+#: model:res.groups,name:stock_move_line_lock_qty_done.group_stock_move_can_edit_done_qty
+msgid "Can edit done quantity for done stock moves"
+msgstr ""
+
+#. module: stock_move_line_lock_qty_done
+#: model:ir.model,name:stock_move_line_lock_qty_done.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: stock_move_line_lock_qty_done
+#: model:ir.model,name:stock_move_line_lock_qty_done.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: stock_move_line_lock_qty_done
+#: model:ir.model.fields,field_description:stock_move_line_lock_qty_done.field_res_company__lock_qty_done
+#: model:ir.model.fields,field_description:stock_move_line_lock_qty_done.field_res_config_settings__lock_qty_done
+msgid "Limit Updates to Done Quantity After Validation"
+msgstr ""
+
+#. module: stock_move_line_lock_qty_done
+#: model:ir.model.fields,help:stock_move_line_lock_qty_done.field_res_company__lock_qty_done
+#: model:ir.model.fields,help:stock_move_line_lock_qty_done.field_res_config_settings__lock_qty_done
+#: model_terms:ir.ui.view,arch_db:stock_move_line_lock_qty_done.view_stock_config_settings
+msgid ""
+"Only users in the 'Can Edit Done Quantity for Done Stock Moves' group are "
+"allowed to edit the 'done' quantity for validated transfer."
+msgstr ""
+
+#. module: stock_move_line_lock_qty_done
+#: model:ir.model,name:stock_move_line_lock_qty_done.model_stock_move_line
+msgid "Product Moves (Stock Move Line)"
+msgstr ""
+
+#. module: stock_move_line_lock_qty_done
+#. odoo-python
+#: code:addons/stock_move_line_lock_qty_done/models/stock_move_line.py:0
+#, python-format
+msgid ""
+"This move is locked, you can't edit the done quantity unless you unlock it"
+msgstr ""
+
+#. module: stock_move_line_lock_qty_done
+#. odoo-python
+#: code:addons/stock_move_line_lock_qty_done/models/stock_move_line.py:0
+#, python-format
+msgid "You are not allowed to change the quantity done for done moves"
+msgstr ""
