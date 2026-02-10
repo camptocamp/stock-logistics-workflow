@@ -4,6 +4,7 @@
 from freezegun import freeze_time
 
 from odoo import Command, fields
+from odoo.tests import Form
 
 from odoo.addons.stock_partner_delivery_window.tests.common import (
     PartnerDeliveryWindowCommon,
@@ -229,3 +230,29 @@ class TestSalePartnerDeliveryWindow(PartnerDeliveryWindowCommon):
             "The scheduled date is the expected date",
         )
         self.assertFalse(order.picking_ids.partner_delivery_window_warning)
+
+    @freeze_time("2020-04-01 10:00:00")  # Wednesday
+    def test_warning_on_commitment_date_not_fitting_delivery_window(self):
+        """Verify warning is shown if commitment date doesn't fit the delivery window.
+
+        The chosen date is Friday, not fitting the delivery window.
+        """
+        order = self._create_order(self.customer_time_window)
+        with Form(order) as form, self.assertLogs("odoo.tests.form") as cm:
+            form.commitment_date = "2020-04-03 10:00:00"  # Friday
+            self.assertTrue(
+                cm.output[0].startswith("WARNING:odoo.tests.form.onchange:")
+            )
+            self.assertIn("Customer delivery preference not met", cm.output[0])
+            self.assertEqual(
+                form.commitment_date,
+                "2020-04-03 10:00:00",
+                "The user input is respected, though",
+            )
+
+    @freeze_time("2020-04-01 10:00:00")  # Wednesday
+    def test_warning_on_commitment_date_fitting_delivery_window(self):
+        """No warning is shown if commitment date fits the delivery window."""
+        order = self._create_order(self.customer_time_window)
+        with Form(order) as form, self.assertNoLogs("odoo.tests.form"):
+            form.commitment_date = "2020-04-02 10:00:00"
