@@ -92,9 +92,10 @@ class ResPartner(models.Model):
         :return: Boolean
         """
         self.ensure_one()
-        tz = pytz.timezone(self.tz or self.env.company.partner_id.tz or "UTC")
+        timezone = self.tz or self.env.company.partner_id.tz or "UTC"
+        tz = self.with_context(tz=timezone).env.tz
         if isinstance(date, datetime.datetime):
-            date = date.astimezone(pytz.utc).astimezone(tz)
+            date = pytz.utc.localize(date).astimezone(tz)
         if self.delivery_time_preference == "workdays":
             if date.weekday() > 4:
                 return False
