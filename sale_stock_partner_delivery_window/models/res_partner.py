@@ -1,7 +1,7 @@
 # Copyright 2026 Camptocamp SA (https://www.camptocamp.com).
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 
 import pytz
 
@@ -13,6 +13,23 @@ from odoo.tools.date_utils import start_of
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    def _get_delivery_window_timezone(self):
+        """Return the timezone used to interpret partner delivery windows."""
+        self.ensure_one()
+        timezone = self.tz or self.env.company.partner_id.tz or "UTC"
+        return self.with_context(tz=timezone).env.tz
+
+    def _to_partner_delivery_datetime(self, from_date, tz):
+        """Convert a datetime to partner local datetime.
+
+        :param from_date: date or datetime to convert.
+        :param tz: partner delivery window timezone.
+        :return: timezone aware datetime in the partner timezone.
+        """
+        if isinstance(from_date, datetime):
+            return pytz.utc.localize(from_date).astimezone(tz)
+        return tz.localize(datetime.combine(from_date, time.min))
+
     def _next_available_delivery_date(
         self, from_date: date | datetime | None = None
     ) -> datetime:
@@ -20,11 +37,12 @@ class ResPartner(models.Model):
         # If from_date is not provided, use the current datetime
         if from_date is None:  # pragma: no cover
             from_date = fields.Datetime.now()
-        # Pre-compute the from_datetime, in case from_date is a `date`
-        # We use the start of the day in the partner's timezone
-        tz = pytz.timezone(self.tz or self.env.company.partner_id.tz or "UTC")
+        # get the from_datetime, in case from_date is a `date`.
+        # datetime objects stored in odoo are naive UTC,
+        # while windows are partner local.
+        tz = self._get_delivery_window_timezone()
         from_datetime = fields.Datetime.to_datetime(from_date)
-        from_datetime_tz_aware = tz.localize(from_datetime)
+        from_datetime_tz_aware = self._to_partner_delivery_datetime(from_date, tz)
         # If the delivery is anytime, simply return the from_datetime
         if self.delivery_time_preference == "anytime":
             return from_datetime
@@ -34,7 +52,9 @@ class ResPartner(models.Model):
             weekday = from_datetime_tz_aware.weekday()
             if weekday <= 4:
                 return from_datetime
-            return from_datetime + timedelta(days=7 - weekday)
+            next_date = from_datetime_tz_aware + timedelta(days=7 - weekday)
+            # Convert a datetime back to naive UTC format
+            return next_date.astimezone(pytz.utc).replace(tzinfo=None)
         # If we're using time windows, we search for the next available slot
         # We use the tz-aware datetime, as windows are expressed in the partner's tz
         elif self.delivery_time_preference == "time_windows":
@@ -67,11 +87,11 @@ class ResPartner(models.Model):
                             continue
                     # Otherwise, since we're looking at days ahead, simply pick the
                     # window's start time
-                    return (
-                        datetime.combine(next_date, start_time)
-                        .astimezone(pytz.utc)
-                        .replace(tzinfo=None)
+                    next_datetime = tz.localize(
+                        datetime.combine(next_date.date(), start_time)
                     )
+                    # Convert a datetime back to naive UTC format
+                    return next_datetime.astimezone(pytz.utc).replace(tzinfo=None)
         else:  # pragma: no cover
             raise ValueError(
                 self.env._(
