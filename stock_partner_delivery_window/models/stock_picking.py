@@ -67,7 +67,7 @@ class StockPicking(models.Model):
                 "set to prefer deliveries on working days.",
                 date_name=self._planned_delivery_date_name,
                 date=formatted_delivery_date,
-                tz=self.env.context.get("tz"),
+                tz=self.env.tz,
             )
         else:
             delivery_windows_strings = []
@@ -81,7 +81,7 @@ class StockPicking(models.Model):
                 "set to prefer deliveries on following time windows:\n%(window)s",
                 date_name=self._planned_delivery_date_name,
                 date=formatted_delivery_date,
-                tz=self.env.context.get("tz"),
+                tz=self.env.tz,
                 window="\n".join(delivery_windows_strings),
             )
         return message
