@@ -304,6 +304,9 @@ class StockMove(models.Model):
         routing_to_apply = [
             (move, detail.rule) for move, detail in routing_details.items()
         ]
+        # Keep the moves created by _insert_routing_moves that themselves match
+        # a routing rule, as to try to merge them with similiar moves.
+        inserted_routing_move_ids = set()
         for move, routing_rule in routing_to_apply:
             # Add the routing rule to the context for stock_dynamic_routing_delivery
             move = move.with_context(__routing_rule=routing_rule)
@@ -379,9 +382,14 @@ class StockMove(models.Model):
                 if routing_rule:
                     # Add a new routing to apply for this new move
                     routing_to_apply.append((routing_move, routing_rule))
+                    # Mark it as eligible for merging once its rule is applied.
+                    inserted_routing_move_ids.add(routing_move.id)
 
             pickings_to_check_for_emptiness |= move.picking_id
             move._assign_picking()
+            # Try merging inserted move
+            if move.id in inserted_routing_move_ids:
+                move = move._merge_moves()
             move_ids_to_assign_per_location[move.location_id].append(move.id)
 
         # We have two kind of "routed" moves:
@@ -606,25 +614,7 @@ class StockMove(models.Model):
         )
         if dest_moves:
             dest_moves.write({"move_orig_ids": [(3, self.id), (4, routing_move.id)]})
-
-        # If a routing rule applies to the new move and only reclassifies
-        # its picking type (same destination), resolve it before _action_confirm.
-        # It ensures the move is confirmed directly in the correct picking and can
-        # be properly merged with other moves of the same characteristics.
-        # Rules that also change the destination are handled by _apply_routing_rule_pull
-        routing = self.env["stock.routing"]._routing_rule_for_moves(routing_move)
-        rule = routing[routing_move]
-        if rule:
-            loc_tree = rule.location_dest_id._location_parent_tree()
-            if routing_move.location_dest_id in loc_tree:
-                routing_move.picking_type_id = rule.picking_type_id
-                # Reset picking so _action_confirm triggers _assign_picking
-                routing_move.picking_id = False
-                routing_move.state = "draft"
-                # _action_confirm returns the original move or the one merged into
-                routing_move = routing_move._action_confirm(merge=True)
-                return routing_move
-        routing_move = routing_move._action_confirm(merge=False)
+        routing_move._action_confirm(merge=False)
         return routing_move
 
     def _prepare_routing_move_values(self, picking_type, source, destination):
