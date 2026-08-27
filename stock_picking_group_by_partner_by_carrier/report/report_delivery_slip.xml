@@ -100,10 +100,11 @@
                     >All ordered items have been delivered.</p>
                 </t>
                 <t t-else="">
-                    <p
-                        t-if="o.state == 'done'"
-                        class="remaining-to-deliver-separator"
-                    >Remaining to deliver:</p>
+                    <t t-if="remainings">
+                        <p
+                            class="remaining-to-deliver-separator"
+                        >Remaining to deliver:</p>
+                    </t>
                     <table
                         class="table table-borderless table-sm"
                         name="remaining_to_deliver_table"
