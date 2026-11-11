@@ -1,0 +1,1 @@
+odoo-addon-base_line_numbering @ git+https://github.com/camptocamp/server-ux.git@19-add-base_line_numbering#subdirectory=base_line_numbering
