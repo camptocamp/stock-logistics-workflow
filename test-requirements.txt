@@ -1,0 +1,2 @@
+odoo-addon-base_line_numbering @ git+https://github.com/OCA/server-ux.git@refs/pull/1403/head#subdirectory=base_line_numbering
+odoo-addon-stock_move_position @ git+https://github.com/OCA/stock-logistics-workflow.git@refs/pull/2573/head#subdirectory=stock_move_position
